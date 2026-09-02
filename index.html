@@ -17,6 +17,10 @@
     --gold-bright: #e6c878;
     --line: rgba(242, 233, 216, 0.14);
     --danger: #d97b6c;
+    --line-life: #e6c878;
+    --line-heart: #e08aa0;
+    --line-head: #8ab4e6;
+    --line-fate: #8fd19e;
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -333,6 +337,66 @@
     line-height: 1.65;
     color: #ded5ea;
     margin: 0;
+  }
+
+  /* Reveal-in for section headings, paced with the typewriter text */
+  .section h3 {
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .section h3.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Photo with traced-line overlay */
+  .photo-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    max-height: 56vh;
+    background: #000;
+    overflow: hidden;
+  }
+  .photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .photo-frame svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .line-path {
+    fill: none;
+    stroke-width: 3;
+    vector-effect: non-scaling-stroke;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 4px currentColor);
+  }
+  .line-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px 24px 4px;
+  }
+  .line-legend .chip {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: #b9aec7;
+  }
+  .line-legend .swatch {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
   }
 
   .locked {
@@ -944,6 +1008,99 @@
     }
   }
 
+  // ---------- Line overlay + reveal animation ----------
+  const LINE_COLORS = { life: 'var(--line-life)', heart: 'var(--line-heart)', head: 'var(--line-head)', fate: 'var(--line-fate)' };
+  const LINE_LABELS = { life: 'Life', heart: 'Heart', head: 'Head', fate: 'Fate' };
+
+  function catmullRomPath(points) {
+    if (!points || points.length < 2) return '';
+    let d = `M ${points[0][0]} ${points[0][1]} `;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i - 1] || points[i];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[i + 2] || p2;
+      const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+      const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+      const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+      const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+      d += `C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2[0]} ${p2[1]} `;
+    }
+    return d.trim();
+  }
+
+  function matchLineKey(heading) {
+    const h = (heading || '').toLowerCase();
+    if (h.includes('life')) return 'life';
+    if (h.includes('heart')) return 'heart';
+    if (h.includes('head')) return 'head';
+    if (h.includes('fate') || h.includes('money')) return 'fate';
+    return null;
+  }
+
+  function buildPhotoOverlay(which, lines) {
+    const src = state.capturedImages[which];
+    if (!src) return '';
+    let paths = '';
+    let legend = '';
+    (lines || []).forEach(line => {
+      if (!line.points || line.points.length < 2) return;
+      const key = line.key;
+      const color = LINE_COLORS[key] || 'var(--gold-bright)';
+      const d = catmullRomPath(line.points);
+      paths += `<path id="line-path-${key}" class="line-path" d="${d}" style="stroke:${color};"></path>`;
+      legend += `<div class="chip"><span class="swatch" style="background:${color};"></span>${LINE_LABELS[key] || key}</div>`;
+    });
+    return `
+      <div class="photo-frame">
+        <img src="${src}" alt="Your scanned palm" />
+        <svg viewBox="0 0 1 1" preserveAspectRatio="xMidYMid meet">${paths}</svg>
+      </div>
+      ${legend ? `<div class="line-legend">${legend}</div>` : ''}
+    `;
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function typewriteInto(el, text) {
+    return new Promise(resolve => {
+      const words = (text || '').split(' ');
+      let i = 0;
+      el.textContent = '';
+      function step() {
+        if (i >= words.length) { resolve(); return; }
+        el.textContent += (i === 0 ? '' : ' ') + words[i];
+        i++;
+        setTimeout(step, 34 + Math.random() * 22);
+      }
+      step();
+    });
+  }
+
+  async function revealReading(sections) {
+    for (let idx = 0; idx < sections.length; idx++) {
+      const sec = sections[idx];
+      const wrap = document.querySelector(`#reading-body .section[data-index="${idx}"]`);
+      if (!wrap) continue;
+      const heading = wrap.querySelector('h3');
+      const para = wrap.querySelector('p');
+      heading.classList.add('visible');
+
+      const lineKey = matchLineKey(sec.heading);
+      if (lineKey) {
+        const pathEl = document.getElementById(`line-path-${lineKey}`);
+        if (pathEl) {
+          pathEl.style.transition = 'stroke-dashoffset 1.2s ease';
+          requestAnimationFrame(() => { pathEl.style.strokeDashoffset = '0'; });
+        }
+      }
+
+      await sleep(250);
+      await typewriteInto(para, sec.text);
+      await sleep(260);
+    }
+  }
+
   function renderReading(data) {
     show('reading');
     const which = state.scanningWhich;
@@ -952,13 +1109,24 @@
 
     // Free for now — monetization comes later with the Android build.
     const sections = data.sections || [];
-    let html = '';
-    sections.forEach(s => {
-      html += `<div class="section"><h3>${escapeHtml(s.heading)}<span class="rule"></span></h3><p>${escapeHtml(s.text)}</p></div>`;
+    const photoHtml = buildPhotoOverlay(which, data.lines);
+
+    let sectionsHtml = '';
+    sections.forEach((s, idx) => {
+      sectionsHtml += `<div class="section" data-index="${idx}"><h3>${escapeHtml(s.heading)}<span class="rule"></span></h3><p></p></div>`;
     });
-    $('reading-body').innerHTML = html;
+
+    $('reading-body').innerHTML = photoHtml + sectionsHtml;
+
+    // Prime each traced line as hidden (full dash offset) before the reveal draws it in.
+    document.querySelectorAll('#reading-body .line-path').forEach(p => {
+      const len = p.getTotalLength();
+      p.style.strokeDasharray = len;
+      p.style.strokeDashoffset = len;
+    });
 
     renderReadingActions(which);
+    revealReading(sections);
   }
 
   function renderCompare(data) {
