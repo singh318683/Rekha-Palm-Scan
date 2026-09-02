@@ -483,6 +483,9 @@
 (function () {
   'use strict';
 
+  // Set to false to bring back the free-preview + $3.99 unlock paywall.
+  const TESTING_MODE = true;
+
   const state = {
     handedness: null,      // 'left' | 'right' (which hand user writes with)
     scanningWhich: null,   // which physical hand we're currently scanning
@@ -870,8 +873,10 @@
     $('reading-title').textContent = data.title || 'What your hand tells';
 
     const sections = data.sections || [];
-    const free = sections.slice(0, 2);
-    const locked = sections.slice(2);
+    // TESTING_MODE (set at top of script) shows every section free, no paywall.
+    // Flip TESTING_MODE to false to restore the free-preview + $3.99 unlock.
+    const free = TESTING_MODE ? sections : sections.slice(0, 2);
+    const locked = TESTING_MODE ? [] : sections.slice(2);
 
     let html = '';
     free.forEach(s => {
