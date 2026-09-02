@@ -46,9 +46,15 @@ Write with warmth and confidence, not hedging like a disclaimer, in the spirit o
 
 Write in very simple, plain English so it's easy for anyone to understand, including people who speak English as a second language. Use short sentences (aim for under 15 words each). Use common, everyday words instead of fancy or complicated ones. Avoid palmistry jargon where possible — if you must use a term like "mount" or "fork," explain it in plain words right there rather than assuming the reader knows it.
 
+Also include a "lines" array so the app can draw each line on screen. For each of the life line, heart line, head line, and fate line that you can ACTUALLY see clearly enough to trace, give 4 to 7 points tracing its course from one end to the other. Each point is [x, y], where x and y are fractions of the image width and height (0.0 = left/top edge, 1.0 = right/bottom edge). Only include a line if you can genuinely trace it in the photo — omit any line that's too faint, cropped out, or unclear. Use exactly these keys: "life", "heart", "head", "fate".
+
 Respond with ONLY valid JSON, no markdown fences, no preamble, in exactly this shape:
 {
   "title": "a short evocative 3-6 word title for this reading",
+  "lines": [
+    { "key": "life", "points": [[0.32, 0.55], [0.30, 0.62], [0.29, 0.70]] },
+    { "key": "heart", "points": [[0.25, 0.30], [0.45, 0.28], [0.65, 0.31]] }
+  ],
   "sections": [
     { "heading": "Life Line — Health & Vitality", "text": "2-4 sentences grounded in what you see" },
     { "heading": "Heart Line — Love & Emotion", "text": "2-4 sentences" },
@@ -68,7 +74,7 @@ Respond with ONLY valid JSON, no markdown fences, no preamble, in exactly this s
       },
       body: JSON.stringify({
         model: 'claude-sonnet-5',
-        max_tokens: 1400,
+        max_tokens: 1700,
         system: systemPrompt,
         messages: [
           {
