@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<title>Rekha — Palm Reading</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,450;9..144,560&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #f2e9d8;
+    --void: #17121f;
+    --void-2: #1f1829;
+    --plum: #3a2b4d;
+    --gold: #c9a24b;
+    --gold-bright: #e6c878;
+    --line: rgba(242, 233, 216, 0.14);
+    --danger: #d97b6c;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: var(--void);
+    color: var(--ink);
+    font-family: 'Fraunces', Georgia, serif;
+    overscroll-behavior: none;
+  }
+
+  body {
+    font-family: 'Work Sans', -apple-system, system-ui, sans-serif;
+  }
+
+  h1, h2, h3, .display {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  #app {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+  }
+  .screen.active { display: flex; }
+
+  /* ---------- Intro ---------- */
+  #screen-intro {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 32px;
+    background:
+      radial-gradient(120% 90% at 50% -10%, #2a2038 0%, var(--void) 60%);
+  }
+  .mark {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 28px;
+    opacity: 0.92;
+  }
+  #screen-intro h1 {
+    font-size: 40px;
+    line-height: 1.05;
+    margin: 0 0 14px;
+    color: var(--ink);
+  }
+  .sub {
+    color: #b9aec7;
+    font-size: 16px;
+    line-height: 1.5;
+    max-width: 320px;
+    margin: 0 0 40px;
+  }
+
+  .choice-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+    width: 100%;
+    max-width: 340px;
+  }
+  .choice {
+    flex: 1;
+    padding: 16px 10px;
+    border-radius: 2px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.02);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .choice.selected {
+    border-color: var(--gold);
+    background: rgba(201, 162, 75, 0.1);
+  }
+  .choice-label {
+    display: block;
+    font-size: 11px;
+    text-transform: none;
+    color: #8f84a3;
+    margin-bottom: 16px;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-primary {
+    margin-top: 18px;
+    width: 100%;
+    max-width: 340px;
+    padding: 16px;
+    border-radius: 2px;
+    border: none;
+    background: var(--gold);
+    color: #21161a;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+  }
+  .btn-primary:disabled { opacity: 0.35; }
+  .btn-ghost {
+    margin-top: 12px;
+    background: none;
+    border: none;
+    color: #a99cbf;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 14px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    padding: 8px;
+  }
+
+  /* ---------- Scan ---------- */
+  #screen-scan { background: #000; }
+  #video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(1);
+  }
+  #video.mirror { transform: scaleX(-1); }
+  #overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .scan-top {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: max(18px, env(safe-area-inset-top)) 20px 40px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.65), transparent);
+    text-align: center;
+    z-index: 3;
+  }
+  .scan-top .hand-name {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    color: var(--gold-bright);
+  }
+  .scan-top .hint {
+    font-size: 13px;
+    color: #d8d0e4;
+    margin-top: 4px;
+  }
+
+  .scan-bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 30px 24px max(30px, env(safe-area-inset-bottom));
+    background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 3;
+  }
+  .status-pill {
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(242,233,216,0.25);
+    font-size: 13px;
+    color: var(--ink);
+    margin-bottom: 20px;
+    background: rgba(20,15,28,0.5);
+    transition: border-color 0.25s, color 0.25s;
+  }
+  .status-pill.good {
+    border-color: var(--gold);
+    color: var(--gold-bright);
+  }
+
+  .shutter {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 3px solid var(--ink);
+    background: transparent;
+    position: relative;
+    cursor: pointer;
+  }
+  .shutter::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    background: var(--ink);
+    transition: transform 0.15s, background 0.15s;
+  }
+  .shutter.ready::after { background: var(--gold); }
+  .shutter:active::after { transform: scale(0.85); }
+
+  .switch-cam {
+    position: absolute;
+    top: max(18px, env(safe-area-inset-top));
+    right: 18px;
+    z-index: 4;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(20,15,28,0.55);
+    border: 1px solid rgba(242,233,216,0.2);
+    color: var(--ink);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .back-btn {
+    position: absolute;
+    top: max(18px, env(safe-area-inset-top));
+    left: 18px;
+    z-index: 4;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(20,15,28,0.55);
+    border: 1px solid rgba(242,233,216,0.2);
+    color: var(--ink);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  /* ---------- Loading ---------- */
+  #screen-loading {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: var(--void);
+    padding: 32px;
+  }
+  .spinner {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 2px solid rgba(201,162,75,0.25);
+    border-top-color: var(--gold);
+    animation: spin 0.9s linear infinite;
+    margin-bottom: 26px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loading-text {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    color: #d8d0e4;
+    min-height: 24px;
+  }
+
+  /* ---------- Reading ---------- */
+  #screen-reading {
+    background: var(--void);
+    overflow-y: auto;
+  }
+  .reading-hero {
+    padding: max(24px, env(safe-area-inset-top)) 24px 26px;
+    background: radial-gradient(140% 100% at 50% 0%, #2a2038 0%, var(--void) 65%);
+    border-bottom: 1px solid var(--line);
+  }
+  .reading-hero .eyebrow {
+    color: var(--gold);
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .reading-hero h2 {
+    font-size: 28px;
+    margin: 0;
+    color: var(--ink);
+  }
+  .reading-body {
+    padding: 26px 24px 10px;
+  }
+  .section {
+    margin-bottom: 30px;
+  }
+  .section h3 {
+    font-size: 17px;
+    color: var(--gold-bright);
+    margin: 0 0 8px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .section h3 .rule {
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+  .section p {
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: #ded5ea;
+    margin: 0;
+  }
+
+  .locked {
+    position: relative;
+    padding: 22px 24px 30px;
+    margin: 6px 0 30px;
+    border-top: 1px solid var(--line);
+  }
+  .locked .blur-text {
+    filter: blur(5px);
+    user-select: none;
+    color: #ded5ea;
+    font-size: 15.5px;
+    line-height: 1.65;
+  }
+  .lock-cta {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    background: linear-gradient(to bottom, rgba(23,18,31,0), var(--void) 55%);
+  }
+  .lock-cta .lock-title {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    color: var(--gold-bright);
+    margin-bottom: 6px;
+  }
+  .lock-cta .lock-sub {
+    font-size: 13.5px;
+    color: #b9aec7;
+    margin-bottom: 16px;
+    max-width: 260px;
+  }
+  .unlock-btn {
+    padding: 13px 26px;
+    border-radius: 2px;
+    border: 1px solid var(--gold);
+    background: rgba(201,162,75,0.12);
+    color: var(--gold-bright);
+    font-family: 'Work Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .reading-footer {
+    padding: 10px 24px max(40px, env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .disclaimer {
+    font-size: 11.5px;
+    color: #6c6280;
+    text-align: center;
+    max-width: 300px;
+    line-height: 1.5;
+    margin-top: 10px;
+  }
+
+  .error-box {
+    margin: 24px;
+    padding: 18px;
+    border: 1px solid rgba(217,123,108,0.4);
+    background: rgba(217,123,108,0.08);
+    color: #e8c3ba;
+    font-size: 14px;
+    border-radius: 2px;
+    line-height: 1.5;
+  }
+
+  @media (min-width: 720px) {
+    #app { max-width: 460px; margin: 0 auto; box-shadow: 0 0 60px rgba(0,0,0,0.5); }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- INTRO -->
+  <section id="screen-intro" class="screen active">
+    <svg class="mark" viewBox="0 0 64 64" fill="none">
+      <path d="M20 58c-2-10-2-18 0-24 1-3 1-6-1-10-2-5-1-9 2-9 2 0 3 2 3 5v10M24 24v-14c0-3 1.5-5 3.5-5s3.5 2 3.5 5v13M31 23V8c0-3 1.5-5 3.5-5S38 5 38 8v15M38 24v-9c0-3 1.5-5 3.5-5S45 12 45 15v20c0 14-6 23-13 23-8 0-12-5-14-9" stroke="#c9a24b" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h1>Rekha</h1>
+    <p class="sub">Scan your palm. See what the lines of your hand have carried since birth — and what you've made of them since.</p>
+
+    <div>
+      <span class="choice-label">Which hand do you write with?</span>
+      <div class="choice-row">
+        <button class="choice" data-hand="left">Left</button>
+        <button class="choice" data-hand="right">Right</button>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="start-btn" disabled>Begin the reading</button>
+  </section>
+
+  <!-- SCAN -->
+  <section id="screen-scan" class="screen">
+    <button class="back-btn" id="scan-back">‹</button>
+    <button class="switch-cam" id="switch-cam">⟳</button>
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="overlay"></canvas>
+    <canvas id="capture-canvas" style="display:none;"></canvas>
+
+    <div class="scan-top">
+      <div class="hand-name" id="scan-hand-name">Scan your left palm</div>
+      <div class="hint" id="scan-hint">Hold it flat, fingers spread, inside the outline</div>
+    </div>
+
+    <div class="scan-bottom">
+      <div class="status-pill" id="status-pill">Looking for your palm…</div>
+      <button class="shutter" id="shutter"></button>
+    </div>
+  </section>
+
+  <!-- QUICK INFO (instant, local — shown right after capture) -->
+  <section id="screen-quickinfo" class="screen">
+    <div class="reading-hero">
+      <div class="eyebrow" id="quickinfo-eyebrow">YOUR LEFT PALM</div>
+      <h2 id="quickinfo-title">A First Look</h2>
+    </div>
+    <div class="reading-body" id="quickinfo-body"></div>
+    <div class="reading-footer">
+      <button class="btn-primary" id="start-analysis-btn" style="max-width: none;">Start your analysis</button>
+      <button class="btn-ghost" id="quickinfo-rescan">Scan again</button>
+    </div>
+  </section>
+
+  <!-- LOADING -->
+  <section id="screen-loading" class="screen">
+    <div class="spinner"></div>
+    <div id="loading-text">Tracing your life line…</div>
+  </section>
+
+  <!-- READING -->
+  <section id="screen-reading" class="screen">
+    <div class="reading-hero">
+      <div class="eyebrow" id="reading-eyebrow">YOUR LEFT PALM</div>
+      <h2 id="reading-title">What your hand tells</h2>
+    </div>
+    <div class="reading-body" id="reading-body"></div>
+    <div class="reading-footer">
+      <div id="reading-actions"></div>
+      <div class="disclaimer">For reflection and entertainment. Palmistry is a traditional practice, not a scientific or medical assessment.</div>
+    </div>
+  </section>
+
+  <!-- COMPARE -->
+  <section id="screen-compare" class="screen">
+    <div class="reading-hero">
+      <div class="eyebrow">GOD-GIFTED VS. SELF-MADE</div>
+      <h2 id="compare-title">Then & Now</h2>
+    </div>
+    <div class="reading-body" id="compare-body"></div>
+    <div class="reading-footer">
+      <button class="btn-ghost" id="compare-start-over">Start over</button>
+      <div class="disclaimer">For reflection and entertainment. Palmistry is a traditional practice, not a scientific or medical assessment.</div>
+    </div>
+  </section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
+<script>
+(function () {
+  'use strict';
+
+  // Set to false to bring back the free-preview + $3.99 unlock paywall.
+  // Monetization is deferred until the Android build — everything is free right now.
+
+  const state = {
+    handedness: null,      // 'left' | 'right' (which hand user writes with)
+    scanningWhich: null,   // which physical hand we're currently scanning
+    facingMode: 'environment',
+    stream: null,
+    hands: null,
+    goodFrames: 0,
+    lastCaptureReady: false,
+    lastLandmarks: null,
+    capturedImages: {},    // { left: base64, right: base64 }
+    capturedLandmarks: {}, // { left: [...21 points], right: [...21 points] }
+    readings: {},          // { left: {title,sections}, right: {title,sections} }
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const screens = {
+    intro: $('screen-intro'),
+    scan: $('screen-scan'),
+    quickinfo: $('screen-quickinfo'),
+    loading: $('screen-loading'),
+    reading: $('screen-reading'),
+    compare: $('screen-compare'),
+  };
+
+  function show(name) {
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[name].classList.add('active');
+  }
+
+  // ---------- Intro ----------
+  document.querySelectorAll('.choice[data-hand]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.choice[data-hand]').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      state.handedness = btn.dataset.hand;
+      $('start-btn').disabled = false;
+    });
+  });
+
+  $('start-btn').addEventListener('click', () => {
+    state.scanningWhich = state.handedness === 'right' ? 'left' : 'right'; // start with non-dominant hand
+    beginScan(state.scanningWhich);
+  });
+
+  $('scan-back').addEventListener('click', () => {
+    stopCamera();
+    show('intro');
+  });
+
+  function resetAll() {
+    state.capturedImages = {};
+    state.capturedLandmarks = {};
+    state.readings = {};
+    show('intro');
+  }
+  $('compare-start-over').addEventListener('click', resetAll);
+
+  // ---------- Camera + hand tracking ----------
+  const video = $('video');
+  const overlay = $('overlay');
+  const octx = overlay.getContext('2d');
+  const capCanvas = $('capture-canvas');
+
+  function updateScanCopy() {
+    const label = state.scanningWhich === 'left' ? 'left' : 'right';
+    $('scan-hand-name').textContent = `Scan your ${label} palm`;
+    const isNonDominant = (state.scanningWhich !== state.handedness);
+    $('scan-hint').textContent = isNonDominant
+      ? 'Your natural hand — hold it flat, fingers spread'
+      : 'Your shaping hand — hold it flat, fingers spread';
+  }
+
+  async function beginScan(which) {
+    state.scanningWhich = which;
+    updateScanCopy();
+    show('scan');
+    resetGuide();
+    await startCamera();
+  }
+
+  async function startCamera() {
+    stopCamera();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: state.facingMode, width: { ideal: 720 }, height: { ideal: 960 } },
+        audio: false,
+      });
+      state.stream = stream;
+      video.srcObject = stream;
+      video.classList.toggle('mirror', state.facingMode === 'user');
+      await video.play();
+      sizeOverlay();
+      initHandsIfNeeded();
+      pump();
+    } catch (err) {
+      $('status-pill').textContent = 'Camera access needed — check permissions';
+    }
+  }
+
+  function stopCamera() {
+    if (state.stream) {
+      state.stream.getTracks().forEach(t => t.stop());
+      state.stream = null;
+    }
+  }
+
+  $('switch-cam').addEventListener('click', () => {
+    state.facingMode = state.facingMode === 'environment' ? 'user' : 'environment';
+    startCamera();
+  });
+
+  function sizeOverlay() {
+    overlay.width = video.clientWidth;
+    overlay.height = video.clientHeight;
+  }
+  window.addEventListener('resize', sizeOverlay);
+
+  function initHandsIfNeeded() {
+    if (state.hands) return;
+    try {
+      state.hands = new Hands({
+        locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${f}`,
+      });
+      state.hands.setOptions({
+        maxNumHands: 1,
+        modelComplexity: 0,
+        minDetectionConfidence: 0.6,
+        minTrackingConfidence: 0.5,
+      });
+      state.hands.onResults(onResults);
+    } catch (e) {
+      state.hands = null; // fall back to manual capture only
+    }
+  }
+
+  let pumping = false;
+  async function pump() {
+    if (pumping) return;
+    pumping = true;
+    loop();
+  }
+  async function loop() {
+    if (!screens.scan.classList.contains('active')) { pumping = false; return; }
+    if (state.hands && video.readyState >= 2) {
+      try { await state.hands.send({ image: video }); } catch (e) {}
+    }
+    requestAnimationFrame(loop);
+  }
+
+  const HOLD_MS = 2600; // how long a steady, centered hand must be held before auto-capture
+
+  function resetGuide() {
+    state.okSince = null;
+    state.lastCaptureReady = false;
+    state.lastLandmarks = null;
+    $('status-pill').classList.remove('good');
+    $('status-pill').textContent = 'Looking for your palm…';
+    $('shutter').classList.remove('ready');
+  }
+
+  function onResults(results) {
+    octx.clearRect(0, 0, overlay.width, overlay.height);
+    const w = overlay.width, h = overlay.height;
+
+    // outline guide
+    octx.strokeStyle = 'rgba(230,200,120,0.5)';
+    octx.lineWidth = 2;
+    octx.setLineDash([6, 6]);
+    octx.strokeRect(w * 0.22, h * 0.28, w * 0.56, h * 0.44);
+    octx.setLineDash([]);
+
+    const lm = results.multiHandLandmarks && results.multiHandLandmarks[0];
+    if (!lm) {
+      state.okSince = null;
+      updateStatus(false, 0);
+      return;
+    }
+
+    // draw landmarks
+    octx.fillStyle = '#e6c878';
+    lm.forEach(p => {
+      octx.beginPath();
+      octx.arc((state.facingMode === 'user' ? (1 - p.x) : p.x) * w, p.y * h, 3, 0, Math.PI * 2);
+      octx.fill();
+    });
+
+    // heuristic: hand roughly centered, spans a reasonable area, spread fingers
+    const xs = lm.map(p => p.x), ys = lm.map(p => p.y);
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const minY = Math.min(...ys), maxY = Math.max(...ys);
+    const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+    const spanX = maxX - minX, spanY = maxY - minY;
+
+    const centered = Math.abs(cx - 0.5) < 0.18 && Math.abs(cy - 0.5) < 0.2;
+    const sizedWell = spanX > 0.28 && spanY > 0.28 && spanX < 0.9 && spanY < 0.9;
+
+    const ok = centered && sizedWell;
+
+    if (ok) {
+      state.lastLandmarks = lm;
+      if (state.okSince === null) state.okSince = performance.now();
+    } else {
+      state.okSince = null;
+    }
+
+    const heldMs = state.okSince === null ? 0 : (performance.now() - state.okSince);
+    updateStatus(ok, heldMs);
+
+    if (ok && heldMs >= HOLD_MS && !state.lastCaptureReady) {
+      state.lastCaptureReady = true;
+      doCapture();
+    }
+  }
+
+  function updateStatus(ok, heldMs) {
+    const pill = $('status-pill');
+    const shutter = $('shutter');
+    if (ok) {
+      const secsLeft = Math.max(0, Math.ceil((HOLD_MS - heldMs) / 1000));
+      pill.textContent = secsLeft > 0 ? `Hold still… ${secsLeft}` : 'Capturing…';
+      pill.classList.add('good');
+      shutter.classList.add('ready');
+    } else {
+      pill.textContent = 'Center your palm in the outline';
+      pill.classList.remove('good');
+      shutter.classList.remove('ready');
+    }
+  }
+
+  $('shutter').addEventListener('click', () => doCapture());
+
+  function doCapture() {
+    capCanvas.width = video.videoWidth;
+    capCanvas.height = video.videoHeight;
+    const ctx = capCanvas.getContext('2d');
+    if (state.facingMode === 'user') {
+      ctx.translate(capCanvas.width, 0);
+      ctx.scale(-1, 1);
+    }
+    ctx.drawImage(video, 0, 0, capCanvas.width, capCanvas.height);
+    const dataUrl = capCanvas.toDataURL('image/jpeg', 0.85);
+    state.capturedImages[state.scanningWhich] = dataUrl;
+    state.capturedLandmarks[state.scanningWhich] = state.lastLandmarks;
+    stopCamera();
+    showQuickInfo();
+  }
+
+  // ---------- Quick info (instant, local, no API call) ----------
+  function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y, (a.z || 0) - (b.z || 0)); }
+
+  function computeQuickMetrics(lm) {
+    if (!lm) return null;
+    const wrist = lm[0];
+    const palmLength = dist(wrist, lm[9]);
+    const palmWidth = dist(lm[5], lm[17]);
+    const indexLen = dist(lm[5], lm[8]);
+    const middleLen = dist(lm[9], lm[12]);
+    const ringLen = dist(lm[13], lm[16]);
+    const pinkyLen = dist(lm[17], lm[20]);
+    const avgFingerLen = (indexLen + middleLen + ringLen + pinkyLen) / 4;
+    return {
+      shapeRatio: palmLength / palmWidth,
+      fingerToPalmRatio: avgFingerLen / palmLength,
+    };
+  }
+
+  function pct(ratio) { return Math.round(ratio * 100); }
+
+  function quickInfoHtml(metrics) {
+    let shapeText, shapeHeading;
+    if (metrics.shapeRatio > 1.12) {
+      shapeHeading = 'A Water Hand';
+      shapeText = `Your palm runs noticeably longer than it is wide (about ${metrics.shapeRatio.toFixed(2)}:1) — traditionally called a "Water hand." This shape is read as sensitivity and imagination.`;
+    } else if (metrics.shapeRatio < 0.98) {
+      shapeHeading = 'An Earth Hand';
+      shapeText = `Your palm is wider than it is long (${metrics.shapeRatio.toFixed(2)}:1) — traditionally an "Earth hand," read as grounded and practical.`;
+    } else {
+      shapeHeading = 'A Balanced Hand';
+      shapeText = `Your palm sits close to square (${metrics.shapeRatio.toFixed(2)}:1) — a balanced shape traditionally read as adaptability.`;
+    }
+
+    let fingerText;
+    if (metrics.fingerToPalmRatio > 0.85) {
+      fingerText = `Your fingers run long relative to your palm (${pct(metrics.fingerToPalmRatio)}% of palm length) — traditionally tied to patience and attention to detail.`;
+    } else {
+      fingerText = `Your fingers are shorter relative to your palm (${pct(metrics.fingerToPalmRatio)}% of palm length) — traditionally read as instinctive and quick to act.`;
+    }
+
+    return {
+      title: shapeHeading,
+      html: `
+        <div class="section"><h3>Hand Shape<span class="rule"></span></h3><p>${escapeHtml(shapeText)}</p></div>
+        <div class="section"><h3>Finger Length<span class="rule"></span></h3><p>${escapeHtml(fingerText)}</p></div>
+      `,
+    };
+  }
+
+  function showQuickInfo() {
+    const which = state.scanningWhich;
+    const lm = state.capturedLandmarks[which];
+    const metrics = computeQuickMetrics(lm);
+    show('quickinfo');
+    $('quickinfo-eyebrow').textContent = `YOUR ${which.toUpperCase()} PALM`;
+    if (!metrics) {
+      $('quickinfo-title').textContent = 'A First Look';
+      $('quickinfo-body').innerHTML = `<div class="section"><p>Got the scan — ready for the full analysis whenever you are.</p></div>`;
+      return;
+    }
+    const { title, html } = quickInfoHtml(metrics);
+    $('quickinfo-title').textContent = title;
+    $('quickinfo-body').innerHTML = html;
+  }
+
+  $('start-analysis-btn').addEventListener('click', () => requestReading());
+  $('quickinfo-rescan').addEventListener('click', () => resetAll());
+
+  // ---------- Reading (AI vision — reads actual palm lines, small per-scan cost) ----------
+  const readingLoadingLines = [
+    'Tracing your life line…',
+    'Reading the heart line…',
+    'Following the head line…',
+    'Checking your fate line…',
+    'Almost there…',
+  ];
+  const compareLoadingLines = [
+    'Laying both hands side by side…',
+    'Comparing what you were born with…',
+    'Weighing how life has shaped you…',
+    'Finding what changed, and what didn\u2019t…',
+    'Almost there…',
+  ];
+
+  function cycleLoadingText(lines) {
+    let i = 0;
+    $('loading-text').textContent = lines[0];
+    return setInterval(() => {
+      i = (i + 1) % lines.length;
+      $('loading-text').textContent = lines[i];
+    }, 1600);
+  }
+
+  function otherHandOf(h) { return h === 'left' ? 'right' : 'left'; }
+
+  async function requestReading() {
+    show('loading');
+    const timer = cycleLoadingText(readingLoadingLines);
+    try {
+      const res = await fetch('/api/reading', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: state.capturedImages[state.scanningWhich],
+          scannedHand: state.scanningWhich,
+          dominantHand: state.handedness,
+        }),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.error || `Reading failed (${res.status})`);
+      }
+      const data = await res.json();
+      clearInterval(timer);
+      state.readings[state.scanningWhich] = data;
+      renderReading(data);
+    } catch (err) {
+      clearInterval(timer);
+      renderError(err.message);
+    }
+  }
+
+  async function requestComparison() {
+    show('loading');
+    const timer = cycleLoadingText(compareLoadingLines);
+    const nonDominant = otherHandOf(state.handedness);
+    const dominant = state.handedness;
+    try {
+      const res = await fetch('/api/compare', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bornImage: state.capturedImages[nonDominant],
+          shapedImage: state.capturedImages[dominant],
+          bornHand: nonDominant,
+          shapedHand: dominant,
+        }),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.error || `Comparison failed (${res.status})`);
+      }
+      const data = await res.json();
+      clearInterval(timer);
+      renderCompare(data);
+    } catch (err) {
+      clearInterval(timer);
+      renderError(err.message);
+    }
+  }
+
+  function renderError(msg) {
+    show('reading');
+    $('reading-eyebrow').textContent = 'SOMETHING WENT WRONG';
+    $('reading-title').textContent = 'Couldn\u2019t read your palm';
+    $('reading-body').innerHTML = `<div class="error-box">${escapeHtml(msg)}<br><br>Make sure the API server has ANTHROPIC_API_KEY configured, then try scanning again.</div>`;
+    $('reading-actions').innerHTML = '';
+  }
+
+  function escapeHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function renderReadingActions(which) {
+    const other = otherHandOf(which);
+    const actionsEl = $('reading-actions');
+
+    if (!state.readings[other]) {
+      actionsEl.innerHTML = `
+        <button class="btn-primary" id="scan-other-btn" style="max-width: none;">Scan your other hand too</button>
+        <button class="btn-ghost" id="done-btn">I\u2019m done for now</button>`;
+      $('scan-other-btn').addEventListener('click', () => beginScan(other));
+      $('done-btn').addEventListener('click', () => { actionsEl.innerHTML = ''; });
+    } else {
+      actionsEl.innerHTML = `
+        <button class="btn-primary" id="compare-btn" style="max-width: none;">Compare: God-Gifted vs. Self-Made</button>
+        <button class="btn-ghost" id="start-over-btn">Start over</button>`;
+      $('compare-btn').addEventListener('click', () => requestComparison());
+      $('start-over-btn').addEventListener('click', resetAll);
+    }
+  }
+
+  function renderReading(data) {
+    show('reading');
+    const which = state.scanningWhich;
+    $('reading-eyebrow').textContent = `YOUR ${which.toUpperCase()} PALM`;
+    $('reading-title').textContent = data.title || 'What your hand tells';
+
+    // Free for now — monetization comes later with the Android build.
+    const sections = data.sections || [];
+    let html = '';
+    sections.forEach(s => {
+      html += `<div class="section"><h3>${escapeHtml(s.heading)}<span class="rule"></span></h3><p>${escapeHtml(s.text)}</p></div>`;
+    });
+    $('reading-body').innerHTML = html;
+
+    renderReadingActions(which);
+  }
+
+  function renderCompare(data) {
+    show('compare');
+    $('compare-title').textContent = data.title || 'Then & Now';
+
+    const sections = data.sections || [];
+    let html = '';
+    sections.forEach(s => {
+      html += `<div class="section"><h3>${escapeHtml(s.heading)}<span class="rule"></span></h3><p>${escapeHtml(s.text)}</p></div>`;
+    });
+    $('compare-body').innerHTML = html;
+  }
+
+})();
+</script>
+</body>
+</html>
