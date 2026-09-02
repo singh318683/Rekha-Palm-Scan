@@ -784,20 +784,20 @@
     let shapeText, shapeHeading;
     if (metrics.shapeRatio > 1.12) {
       shapeHeading = 'A Water Hand';
-      shapeText = `Your palm runs noticeably longer than it is wide (about ${metrics.shapeRatio.toFixed(2)}:1) — traditionally called a "Water hand." This shape is read as sensitivity and imagination.`;
+      shapeText = `Your palm is longer than it is wide (about ${metrics.shapeRatio.toFixed(2)} to 1). People call this a "Water hand." It is said to mean you feel things deeply and have a lot of imagination.`;
     } else if (metrics.shapeRatio < 0.98) {
       shapeHeading = 'An Earth Hand';
-      shapeText = `Your palm is wider than it is long (${metrics.shapeRatio.toFixed(2)}:1) — traditionally an "Earth hand," read as grounded and practical.`;
+      shapeText = `Your palm is wider than it is long (${metrics.shapeRatio.toFixed(2)} to 1). People call this an "Earth hand." It is said to mean you are practical and steady.`;
     } else {
       shapeHeading = 'A Balanced Hand';
-      shapeText = `Your palm sits close to square (${metrics.shapeRatio.toFixed(2)}:1) — a balanced shape traditionally read as adaptability.`;
+      shapeText = `Your palm is close to square (${metrics.shapeRatio.toFixed(2)} to 1). This is a balanced shape. It is said to mean you can adapt easily to new things.`;
     }
 
     let fingerText;
     if (metrics.fingerToPalmRatio > 0.85) {
-      fingerText = `Your fingers run long relative to your palm (${pct(metrics.fingerToPalmRatio)}% of palm length) — traditionally tied to patience and attention to detail.`;
+      fingerText = `Your fingers are long compared to your palm (${pct(metrics.fingerToPalmRatio)}% of your palm's length). This is said to mean you are patient and notice small details.`;
     } else {
-      fingerText = `Your fingers are shorter relative to your palm (${pct(metrics.fingerToPalmRatio)}% of palm length) — traditionally read as instinctive and quick to act.`;
+      fingerText = `Your fingers are shorter compared to your palm (${pct(metrics.fingerToPalmRatio)}% of your palm's length). This is said to mean you trust your gut and act fast.`;
     }
 
     return {
