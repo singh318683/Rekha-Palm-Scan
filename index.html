@@ -484,7 +484,7 @@
   'use strict';
 
   // Set to false to bring back the free-preview + $3.99 unlock paywall.
-  const TESTING_MODE = true;
+  const TESTING_MODE = false;
 
   const state = {
     handedness: null,      // 'left' | 'right' (which hand user writes with)
@@ -780,7 +780,7 @@
 
     const sections = data.sections || [];
     // TESTING_MODE (set at top of script) shows every section free, no paywall.
-    // Flip TESTING_MODE to false to restore the free-preview + $3.99 unlock.
+    // Flip TESTING_MODE to true to unlock everything again for testing.
     const free = TESTING_MODE ? sections : sections.slice(0, 2);
     const locked = TESTING_MODE ? [] : sections.slice(2);
 
@@ -796,7 +796,7 @@
         <div class="lock-cta">
           <div class="lock-title">The rest is written in your hand</div>
           <div class="lock-sub">Unlock your fate line, mounts, and full character reading.</div>
-          <button class="unlock-btn" id="unlock-btn">Unlock full reading — $3.99</button>
+          <button class="unlock-btn" id="unlock-btn">Unlock now</button>
         </div>
       </div>`;
     }
