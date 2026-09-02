@@ -22,13 +22,17 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  const { bornImage, shapedImage } = req.body || {};
+  const { bornImage, shapedImage, language } = req.body || {};
   const born = parseImage(bornImage);
   const shaped = parseImage(shapedImage);
   if (!born || !shaped) {
     res.status(400).json({ error: 'Missing or invalid images — need both bornImage and shapedImage' });
     return;
   }
+
+  const languageInstruction = language === 'hi'
+    ? `Write your entire response in Hindi, using the Devanagari script — the title, every heading, and every paragraph of text. Keep the Hindi simple and conversational, the way people actually speak day to day, not heavy literary or Sanskritized Hindi. Use short sentences. It's fine to keep a few widely-understood English loanwords if that's more natural than a stiff pure-Hindi equivalent. Do NOT translate the JSON field names themselves ("title", "sections", "heading", "text") — only the values.`
+    : `Write in very simple, plain English so it's easy for anyone to understand, including people who speak English as a second language. Use short sentences (aim for under 15 words each). Use common, everyday words instead of fancy or complicated ones. Avoid palmistry jargon where possible — if you must use a term like "mount" or "fork," explain it in plain words right there rather than assuming the reader knows it.`;
 
   const systemPrompt = `You are a warm, thoughtful palmistry reader writing for a mobile app called Rekha. You are given two real photos of the same person's palms.
 The FIRST photo is their non-dominant hand — in palmistry this represents what a person was born with, their innate character and potential.
@@ -37,7 +41,7 @@ The SECOND photo is their dominant hand — the hand they actively use — which
 Look closely at the ACTUAL visible creases in both photos and compare them line by line: life line, heart line, head line, and fate/Sun line if present. For each, describe what's genuinely different or genuinely similar between the two hands — deeper vs shallower, longer vs shorter, straighter vs more curved, breaks or forks that appear in one but not the other. Ground every claim in what you can actually see; if a line looks essentially unchanged between the two hands, say so plainly rather than inventing a difference.
 Write with warmth and confidence, in the spirit of a traditional palm reader, framing differences as "what you were born with" vs "what you've become." Do not mention that you are an AI or that this isn't scientific — the app shows its own disclaimer separately.
 
-Write in very simple, plain English so it's easy for anyone to understand, including people who speak English as a second language. Use short sentences (aim for under 15 words each). Use common, everyday words instead of fancy or complicated ones. Avoid palmistry jargon where possible — if you must use a term like "mount" or "fork," explain it in plain words right there rather than assuming the reader knows it.
+${languageInstruction}
 
 Respond with ONLY valid JSON, no markdown fences, no preamble, in exactly this shape:
 {
