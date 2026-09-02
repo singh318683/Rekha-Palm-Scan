@@ -6,7 +6,7 @@
 <title>Rekha — Palm Reading</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,450;9..144,560&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,450;9..144,560&family=Work+Sans:wght@400;500;600&family=Noto+Serif+Devanagari:wght@500;600&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --ink: #f2e9d8;
@@ -30,16 +30,16 @@
     margin: 0;
     background: var(--void);
     color: var(--ink);
-    font-family: 'Fraunces', Georgia, serif;
+    font-family: 'Fraunces', 'Noto Serif Devanagari', Georgia, serif;
     overscroll-behavior: none;
   }
 
   body {
-    font-family: 'Work Sans', -apple-system, system-ui, sans-serif;
+    font-family: 'Work Sans', 'Noto Sans Devanagari', -apple-system, system-ui, sans-serif;
   }
 
   h1, h2, h3, .display {
-    font-family: 'Fraunces', Georgia, serif;
+    font-family: 'Fraunces', 'Noto Serif Devanagari', Georgia, serif;
     font-weight: 500;
     letter-spacing: 0.01em;
   }
@@ -103,7 +103,7 @@
     border: 1px solid var(--line);
     background: rgba(255,255,255,0.02);
     color: var(--ink);
-    font-family: 'Work Sans', sans-serif;
+    font-family: 'Work Sans', 'Noto Sans Devanagari', sans-serif;
     font-size: 14px;
     cursor: pointer;
     transition: border-color 0.2s, background 0.2s;
@@ -130,7 +130,7 @@
     border: none;
     background: var(--gold);
     color: #21161a;
-    font-family: 'Work Sans', sans-serif;
+    font-family: 'Work Sans', 'Noto Sans Devanagari', sans-serif;
     font-size: 15px;
     font-weight: 600;
     letter-spacing: 0.01em;
@@ -142,7 +142,7 @@
     background: none;
     border: none;
     color: #a99cbf;
-    font-family: 'Work Sans', sans-serif;
+    font-family: 'Work Sans', 'Noto Sans Devanagari', sans-serif;
     font-size: 14px;
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -178,7 +178,7 @@
     z-index: 3;
   }
   .scan-top .hand-name {
-    font-family: 'Fraunces', serif;
+    font-family: 'Fraunces', 'Noto Serif Devanagari', serif;
     font-size: 20px;
     color: var(--gold-bright);
   }
@@ -287,7 +287,7 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
   #loading-text {
-    font-family: 'Fraunces', serif;
+    font-family: 'Fraunces', 'Noto Serif Devanagari', serif;
     font-size: 18px;
     color: #d8d0e4;
     min-height: 24px;
@@ -424,7 +424,7 @@
     background: linear-gradient(to bottom, rgba(23,18,31,0), var(--void) 55%);
   }
   .lock-cta .lock-title {
-    font-family: 'Fraunces', serif;
+    font-family: 'Fraunces', 'Noto Serif Devanagari', serif;
     font-size: 19px;
     color: var(--gold-bright);
     margin-bottom: 6px;
@@ -441,7 +441,7 @@
     border: 1px solid var(--gold);
     background: rgba(201,162,75,0.12);
     color: var(--gold-bright);
-    font-family: 'Work Sans', sans-serif;
+    font-family: 'Work Sans', 'Noto Sans Devanagari', sans-serif;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -488,14 +488,21 @@
     <svg class="mark" viewBox="0 0 64 64" fill="none">
       <path d="M20 58c-2-10-2-18 0-24 1-3 1-6-1-10-2-5-1-9 2-9 2 0 3 2 3 5v10M24 24v-14c0-3 1.5-5 3.5-5s3.5 2 3.5 5v13M31 23V8c0-3 1.5-5 3.5-5S38 5 38 8v15M38 24v-9c0-3 1.5-5 3.5-5S45 12 45 15v20c0 14-6 23-13 23-8 0-12-5-14-9" stroke="#c9a24b" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    <h1>Rekha</h1>
-    <p class="sub">Scan your palm. See what the lines of your hand have carried since birth — and what you've made of them since.</p>
+    <h1 id="intro-title">Rekha</h1>
+    <p class="sub" id="intro-sub">Scan your palm. See what the lines of your hand have carried since birth — and what you've made of them since.</p>
 
     <div>
-      <span class="choice-label">Which hand do you write with?</span>
       <div class="choice-row">
-        <button class="choice" data-hand="left">Left</button>
-        <button class="choice" data-hand="right">Right</button>
+        <button class="choice" data-lang="en">English</button>
+        <button class="choice" data-lang="hi">हिंदी</button>
+      </div>
+    </div>
+
+    <div>
+      <span class="choice-label" id="hand-question-label">Which hand do you write with?</span>
+      <div class="choice-row">
+        <button class="choice" data-hand="left" id="hand-left-btn">Left</button>
+        <button class="choice" data-hand="right" id="hand-right-btn">Right</button>
       </div>
     </div>
 
@@ -549,20 +556,20 @@
     <div class="reading-body" id="reading-body"></div>
     <div class="reading-footer">
       <div id="reading-actions"></div>
-      <div class="disclaimer">For reflection and entertainment. Palmistry is a traditional practice, not a scientific or medical assessment.</div>
+      <div class="disclaimer" id="reading-disclaimer">For reflection and entertainment. Palmistry is a traditional practice, not a scientific or medical assessment.</div>
     </div>
   </section>
 
   <!-- COMPARE -->
   <section id="screen-compare" class="screen">
     <div class="reading-hero">
-      <div class="eyebrow">GOD-GIFTED VS. SELF-MADE</div>
+      <div class="eyebrow" id="compare-eyebrow">GOD-GIFTED VS. SELF-MADE</div>
       <h2 id="compare-title">Then & Now</h2>
     </div>
     <div class="reading-body" id="compare-body"></div>
     <div class="reading-footer">
       <button class="btn-ghost" id="compare-start-over">Start over</button>
-      <div class="disclaimer">For reflection and entertainment. Palmistry is a traditional practice, not a scientific or medical assessment.</div>
+      <div class="disclaimer" id="compare-disclaimer">For reflection and entertainment. Palmistry is a traditional practice, not a scientific or medical assessment.</div>
     </div>
   </section>
 
@@ -573,10 +580,111 @@
 (function () {
   'use strict';
 
+  // ---------- Translations ----------
+  const I18N = {
+    en: {
+      appTitle: 'Rekha',
+      tagline: 'Scan your palm. See what the lines of your hand have carried since birth — and what you\u2019ve made of them since.',
+      langEnglish: 'English',
+      langHindi: '\u0939\u093f\u0902\u0926\u0940',
+      handQuestionLabel: 'Which hand do you write with?',
+      left: 'Left',
+      right: 'Right',
+      beginBtn: 'Begin the reading',
+      scanHandName: (handLabel) => `Scan your ${handLabel} palm`,
+      handLower: { left: 'left', right: 'right' },
+      scanHintNonDominant: 'Your natural hand — hold it flat, fingers spread',
+      scanHintDominant: 'Your shaping hand — hold it flat, fingers spread',
+      statusLooking: 'Looking for your palm…',
+      statusCenter: 'Center your palm in the outline',
+      statusHold: (n) => `Hold still… ${n}`,
+      statusCapturing: 'Capturing…',
+      cameraError: 'Camera access needed — check permissions',
+      quickInfoDefaultTitle: 'A First Look',
+      quickInfoGotScan: 'Got the scan — ready for the full analysis whenever you are.',
+      handShapeHeading: 'Hand Shape',
+      fingerLengthHeading: 'Finger Length',
+      waterHandTitle: 'A Water Hand',
+      earthHandTitle: 'An Earth Hand',
+      balancedHandTitle: 'A Balanced Hand',
+      waterHandText: (r) => `Your palm is longer than it is wide (about ${r} to 1). People call this a "Water hand." It is said to mean you feel things deeply and have a lot of imagination.`,
+      earthHandText: (r) => `Your palm is wider than it is long (${r} to 1). People call this an "Earth hand." It is said to mean you are practical and steady.`,
+      balancedHandText: (r) => `Your palm is close to square (${r} to 1). This is a balanced shape. It is said to mean you can adapt easily to new things.`,
+      longFingerText: (p) => `Your fingers are long compared to your palm (${p}% of your palm's length). This is said to mean you are patient and notice small details.`,
+      shortFingerText: (p) => `Your fingers are shorter compared to your palm (${p}% of your palm's length). This is said to mean you trust your gut and act fast.`,
+      startAnalysisBtn: 'Start your analysis',
+      scanAgainBtn: 'Scan again',
+      readingLoadingLines: ['Tracing your life line…', 'Reading the heart line…', 'Following the head line…', 'Checking your fate line…', 'Almost there…'],
+      compareLoadingLines: ['Laying both hands side by side…', 'Comparing what you were born with…', 'Weighing how life has shaped you…', 'Finding what changed, and what didn\u2019t…', 'Almost there…'],
+      readingEyebrow: (handLabel) => `YOUR ${handLabel.toUpperCase()} PALM`,
+      errorEyebrow: 'SOMETHING WENT WRONG',
+      errorTitle: 'Couldn\u2019t read your palm',
+      errorSuffix: 'Make sure the API server has ANTHROPIC_API_KEY configured, then try scanning again.',
+      scanOtherBtn: 'Scan your other hand too',
+      doneBtn: 'I\u2019m done for now',
+      compareBtn: 'Compare: God-Gifted vs. Self-Made',
+      startOverBtn: 'Start over',
+      disclaimer: 'For reflection and entertainment. Palmistry is a traditional practice, not a scientific or medical assessment.',
+      compareEyebrow: 'GOD-GIFTED VS. SELF-MADE',
+      compareDefaultTitle: 'Then & Now',
+      lineLegendLabels: { life: 'Life', heart: 'Heart', head: 'Head', fate: 'Fate' },
+      readingDefaultTitle: 'What your hand tells',
+    },
+    hi: {
+      appTitle: '\u0930\u0947\u0916\u093e',
+      tagline: '\u0905\u092a\u0928\u0940 \u0939\u0925\u0947\u0932\u0940 \u0915\u094b \u0938\u094d\u0915\u0948\u0928 \u0915\u0930\u0947\u0902\u0964 \u0926\u0947\u0916\u0947\u0902 \u0915\u093f \u0906\u092a\u0915\u0947 \u0939\u093e\u0925 \u0915\u0940 \u0930\u0947\u0916\u093e\u090f\u0902 \u091c\u0928\u094d\u092e \u0938\u0947 \u0915\u094d\u092f\u093e \u0932\u0947\u0915\u0930 \u0906\u0908 \u0939\u0948\u0902 — \u0914\u0930 \u0906\u092a\u0928\u0947 \u0909\u0928\u0938\u0947 \u0905\u092c \u0924\u0915 \u0915\u094d\u092f\u093e \u092c\u0928\u093e\u092f\u093e \u0939\u0948\u0964',
+      langEnglish: 'English',
+      langHindi: '\u0939\u093f\u0902\u0926\u0940',
+      handQuestionLabel: '\u0906\u092a \u0915\u093f\u0938 \u0939\u093e\u0925 \u0938\u0947 \u0932\u093f\u0916\u0924\u0947 \u0939\u0948\u0902?',
+      left: '\u092c\u093e\u092f\u093e\u0901',
+      right: '\u0926\u093e\u092f\u093e\u0901',
+      beginBtn: '\u0930\u0940\u0921\u093f\u0902\u0917 \u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902',
+      scanHandName: (handLabel) => `${handLabel} \u0939\u0925\u0947\u0932\u0940 \u0915\u094b \u0938\u094d\u0915\u0948\u0928 \u0915\u0930\u0947\u0902`,
+      handLower: { left: '\u092c\u093e\u092f\u0940\u0902', right: '\u0926\u093e\u092f\u0940\u0902' },
+      scanHintNonDominant: '\u0906\u092a\u0915\u093e \u091c\u0928\u094d\u092e\u091c\u093e\u0924 \u0939\u093e\u0925 — \u0907\u0938\u0947 \u0938\u0940\u0927\u093e \u0930\u0916\u0947\u0902, \u0909\u0902\u0917\u0932\u093f\u092f\u093e\u0902 \u092b\u0948\u0932\u093e\u090f\u0902',
+      scanHintDominant: '\u0906\u092a\u0915\u093e \u0905\u0928\u0941\u092d\u0935 \u0935\u093e\u0932\u093e \u0939\u093e\u0925 — \u0907\u0938\u0947 \u0938\u0940\u0927\u093e \u0930\u0916\u0947\u0902, \u0909\u0902\u0917\u0932\u093f\u092f\u093e\u0902 \u092b\u0948\u0932\u093e\u090f\u0902',
+      statusLooking: '\u0906\u092a\u0915\u0940 \u0939\u0925\u0947\u0932\u0940 \u0922\u0942\u0902\u0922 \u0930\u0939\u0947 \u0939\u0948\u0902…',
+      statusCenter: '\u0905\u092a\u0928\u0940 \u0939\u0925\u0947\u0932\u0940 \u0915\u094b \u0917\u094b\u0932\u0947 \u0915\u0947 \u092c\u0940\u091a \u092e\u0947\u0902 \u0930\u0916\u0947\u0902',
+      statusHold: (n) => `\u0938\u094d\u0925\u093f\u0930 \u0930\u0939\u0947\u0902… ${n}`,
+      statusCapturing: '\u092b\u094b\u091f\u094b \u0932\u0947 \u0930\u0939\u0947 \u0939\u0948\u0902…',
+      cameraError: '\u0915\u0948\u092e\u0930\u093e \u090f\u0915\u094d\u0938\u0947\u0938 \u091a\u093e\u0939\u093f\u090f — \u0915\u0943\u092a\u092f\u093e \u0905\u0928\u0941\u092e\u0924\u093f \u091c\u093e\u0902\u091a\u0947\u0902',
+      quickInfoDefaultTitle: '\u092a\u0939\u0932\u0940 \u091d\u0932\u0915',
+      quickInfoGotScan: '\u0938\u094d\u0915\u0948\u0928 \u0939\u094b \u0917\u092f\u093e — \u091c\u092c \u091a\u093e\u0939\u0947\u0902 \u092a\u0942\u0930\u093e \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902\u0964',
+      handShapeHeading: '\u0939\u093e\u0925 \u0915\u093e \u0906\u0915\u093e\u0930',
+      fingerLengthHeading: '\u0909\u0902\u0917\u0932\u093f\u092f\u094b\u0902 \u0915\u0940 \u0932\u0902\u092c\u093e\u0908',
+      waterHandTitle: '\u091c\u0932 \u0939\u093e\u0925 (Water Hand)',
+      earthHandTitle: '\u092a\u0943\u0925\u094d\u0935\u0940 \u0939\u093e\u0925 (Earth Hand)',
+      balancedHandTitle: '\u0938\u0902\u0924\u0941\u0932\u093f\u0924 \u0939\u093e\u0925',
+      waterHandText: (r) => `\u0906\u092a\u0915\u0940 \u0939\u0925\u0947\u0932\u0940 \u091a\u094c\u0921\u093c\u093e\u0908 \u0938\u0947 \u091c\u094d\u092f\u093e\u0926\u093e \u0932\u0902\u092c\u0940 \u0939\u0948 (\u0932\u0917\u092d\u0917 ${r} \u0938\u0947 1)\u0964 \u0907\u0938\u0947 "\u091c\u0932 \u0939\u093e\u0925" \u0915\u0939\u0924\u0947 \u0939\u0948\u0902\u0964 \u0915\u0939\u093e \u091c\u093e\u0924\u093e \u0939\u0948 \u0915\u093f \u0906\u092a \u0917\u0939\u0930\u093e\u0908 \u0938\u0947 \u092e\u0939\u0938\u0942\u0938 \u0915\u0930\u0924\u0947 \u0939\u0948\u0902 \u0914\u0930 \u0906\u092a\u0915\u0940 \u0915\u0932\u094d\u092a\u0928\u093e\u0936\u0915\u094d\u0924\u093f \u0905\u091a\u094d\u091b\u0940 \u0939\u0948\u0964`,
+      earthHandText: (r) => `\u0906\u092a\u0915\u0940 \u0939\u0925\u0947\u0932\u0940 \u0932\u0902\u092c\u093e\u0908 \u0938\u0947 \u091c\u094d\u092f\u093e\u0926\u093e \u091a\u094c\u0921\u093c\u0940 \u0939\u0948 (${r} \u0938\u0947 1)\u0964 \u0907\u0938\u0947 "\u092a\u0943\u0925\u094d\u0935\u0940 \u0939\u093e\u0925" \u0915\u0939\u0924\u0947 \u0939\u0948\u0902\u0964 \u0915\u0939\u093e \u091c\u093e\u0924\u093e \u0939\u0948 \u0915\u093f \u0906\u092a \u0935\u094d\u092f\u093e\u0935\u0939\u093e\u0930\u093f\u0915 \u0914\u0930 \u0938\u094d\u0925\u093f\u0930 \u0938\u094d\u0935\u092d\u093e\u0935 \u0915\u0947 \u0939\u0948\u0902\u0964`,
+      balancedHandText: (r) => `\u0906\u092a\u0915\u0940 \u0939\u0925\u0947\u0932\u0940 \u0932\u0917\u092d\u0917 \u0935\u0930\u094d\u0917 \u0939\u0948 (${r} \u0938\u0947 1)\u0964 \u092f\u0939 \u090f\u0915 \u0938\u0902\u0924\u0941\u0932\u093f\u0924 \u0906\u0915\u093e\u0930 \u0939\u0948\u0964 \u0915\u0939\u093e \u091c\u093e\u0924\u093e \u0939\u0948 \u0915\u093f \u0906\u092a \u0928\u0908 \u091a\u0940\u091c\u094b\u0902 \u0915\u0947 \u0938\u093e\u0925 \u0906\u0938\u093e\u0928\u0940 \u0938\u0947 \u0922\u0932 \u091c\u093e\u0924\u0947 \u0939\u0948\u0902\u0964`,
+      longFingerText: (p) => `\u0906\u092a\u0915\u0940 \u0909\u0902\u0917\u0932\u093f\u092f\u093e\u0902 \u0906\u092a\u0915\u0940 \u0939\u0925\u0947\u0932\u0940 \u0915\u0940 \u0924\u0941\u0932\u0928\u093e \u092e\u0947\u0902 \u0932\u0902\u092c\u0940 \u0939\u0948\u0902 (\u0939\u0925\u0947\u0932\u0940 \u0915\u0940 \u0932\u0902\u092c\u093e\u0908 \u0915\u093e ${p}%)\u0964 \u0915\u0939\u093e \u091c\u093e\u0924\u093e \u0939\u0948 \u0915\u093f \u0906\u092a \u0927\u0948\u0930\u094d\u092f\u0935\u093e\u0928 \u0939\u0948\u0902 \u0914\u0930 \u091b\u094b\u091f\u0940-\u091b\u094b\u091f\u0940 \u092c\u093e\u0924\u094b\u0902 \u092a\u0930 \u0927\u094d\u092f\u093e\u0928 \u0926\u0947\u0924\u0947 \u0939\u0948\u0902\u0964`,
+      shortFingerText: (p) => `\u0906\u092a\u0915\u0940 \u0909\u0902\u0917\u0932\u093f\u092f\u093e\u0902 \u0939\u0925\u0947\u0932\u0940 \u0915\u0940 \u0924\u0941\u0932\u0928\u093e \u092e\u0947\u0902 \u091b\u094b\u091f\u0940 \u0939\u0948\u0902 (\u0939\u0925\u0947\u0932\u0940 \u0915\u0940 \u0932\u0902\u092c\u093e\u0908 \u0915\u093e ${p}%)\u0964 \u0915\u0939\u093e \u091c\u093e\u0924\u093e \u0939\u0948 \u0915\u093f \u0906\u092a \u0905\u092a\u0928\u0947 \u092e\u0928 \u0915\u0940 \u092c\u093e\u0924 \u092a\u0930 \u092d\u0930\u094b\u0938\u093e \u0915\u0930\u0924\u0947 \u0939\u0948\u0902 \u0914\u0930 \u091c\u0932\u094d\u0926\u0940 \u0915\u093e\u092e \u0915\u0930\u0924\u0947 \u0939\u0948\u0902\u0964`,
+      startAnalysisBtn: '\u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902',
+      scanAgainBtn: '\u092b\u093f\u0930 \u0938\u0947 \u0938\u094d\u0915\u0948\u0928 \u0915\u0930\u0947\u0902',
+      readingLoadingLines: ['\u091c\u0940\u0935\u0928 \u0930\u0947\u0916\u093e \u0926\u0947\u0916 \u0930\u0939\u0947 \u0939\u0948\u0902…', '\u0939\u0943\u0926\u092f \u0930\u0947\u0916\u093e \u092a\u0922\u093c \u0930\u0939\u0947 \u0939\u0948\u0902…', '\u092e\u0938\u094d\u0924\u093f\u0937\u094d\u0915 \u0930\u0947\u0916\u093e \u0926\u0947\u0916 \u0930\u0939\u0947 \u0939\u0948\u0902…', '\u092d\u093e\u0917\u094d\u092f \u0930\u0947\u0916\u093e \u091c\u093e\u0902\u091a \u0930\u0939\u0947 \u0939\u0948\u0902…', '\u0932\u0917\u092d\u0917 \u0924\u0948\u092f\u093e\u0930…'],
+      compareLoadingLines: ['\u0926\u094b\u0928\u094b\u0902 \u0939\u093e\u0925 \u0938\u093e\u0925 \u0930\u0916 \u0930\u0939\u0947 \u0939\u0948\u0902…', '\u0926\u0947\u0916 \u0930\u0939\u0947 \u0939\u0948\u0902 \u0906\u092a \u091c\u0928\u094d\u092e \u0938\u0947 \u0915\u094d\u092f\u093e \u0932\u0947\u0915\u0930 \u0906\u090f…', '\u0926\u0947\u0916 \u0930\u0939\u0947 \u0939\u0948\u0902 \u091c\u0940\u0935\u0928 \u0928\u0947 \u0906\u092a\u0915\u094b \u0915\u0948\u0938\u0947 \u092c\u0926\u0932\u093e…', '\u0916\u094b\u091c \u0930\u0939\u0947 \u0939\u0948\u0902 \u0915\u094d\u092f\u093e \u092c\u0926\u0932\u093e \u0914\u0930 \u0915\u094d\u092f\u093e \u0935\u0948\u0938\u093e \u0939\u0940 \u0930\u0939\u093e…', '\u0932\u0917\u092d\u0917 \u0924\u0948\u092f\u093e\u0930…'],
+      readingEyebrow: (handLabel) => `\u0906\u092a\u0915\u0940 ${handLabel} \u0939\u0925\u0947\u0932\u0940`,
+      errorEyebrow: '\u0915\u0941\u091b \u0917\u0932\u0924 \u0939\u094b \u0917\u092f\u093e',
+      errorTitle: '\u0906\u092a\u0915\u0940 \u0939\u0925\u0947\u0932\u0940 \u0928\u0939\u0940\u0902 \u092a\u0922\u093c \u092a\u093e\u090f',
+      errorSuffix: '\u0938\u0941\u0928\u093f\u0936\u094d\u091a\u093f\u0924 \u0915\u0930\u0947\u0902 \u0915\u093f \u0938\u0930\u094d\u0935\u0930 \u092a\u0930 ANTHROPIC_API_KEY \u0938\u0947\u091f \u0939\u0948, \u092b\u093f\u0930 \u0926\u094b\u092c\u093e\u0930\u093e \u0938\u094d\u0915\u0948\u0928 \u0915\u0930\u0947\u0902\u0964',
+      scanOtherBtn: '\u0905\u092a\u0928\u093e \u0926\u0942\u0938\u0930\u093e \u0939\u093e\u0925 \u092d\u0940 \u0938\u094d\u0915\u0948\u0928 \u0915\u0930\u0947\u0902',
+      doneBtn: '\u0905\u092d\u0940 \u0915\u0947 \u0932\u093f\u090f \u092c\u0938 \u0907\u0924\u0928\u093e \u0939\u0940',
+      compareBtn: '\u0924\u0941\u0932\u0928\u093e \u0915\u0930\u0947\u0902: \u091c\u0928\u094d\u092e\u091c\u093e\u0924 \u092c\u0928\u093e\u092e \u0906\u0924\u094d\u092e-\u0928\u093f\u0930\u094d\u092e\u093f\u0924',
+      startOverBtn: '\u092b\u093f\u0930 \u0938\u0947 \u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902',
+      disclaimer: '\u092f\u0939 \u0915\u0947\u0935\u0932 \u092e\u0928\u094b\u0930\u0902\u091c\u0928 \u0914\u0930 \u0906\u0924\u094d\u092e-\u091a\u093f\u0902\u0924\u0928 \u0915\u0947 \u0932\u093f\u090f \u0939\u0948\u0964 \u0939\u0938\u094d\u0924\u0930\u0947\u0916\u093e \u0936\u093e\u0938\u094d\u0924\u094d\u0930 \u090f\u0915 \u092a\u0930\u0902\u092a\u0930\u093e\u0917\u0924 \u0935\u093f\u0926\u094d\u092f\u093e \u0939\u0948, \u0935\u0948\u091c\u094d\u091e\u093e\u0928\u093f\u0915 \u092f\u093e \u091a\u093f\u0915\u093f\u0924\u094d\u0938\u093e \u0938\u0932\u093e\u0939 \u0928\u0939\u0940\u0902\u0964',
+      compareEyebrow: '\u091c\u0928\u094d\u092e\u091c\u093e\u0924 \u092c\u0928\u093e\u092e \u0906\u0924\u094d\u092e-\u0928\u093f\u0930\u094d\u092e\u093f\u0924',
+      compareDefaultTitle: '\u0924\u092c \u0914\u0930 \u0905\u092c',
+      lineLegendLabels: { life: '\u091c\u0940\u0935\u0928', heart: '\u0939\u0943\u0926\u092f', head: '\u092e\u0938\u094d\u0924\u093f\u0937\u094d\u0915', fate: '\u092d\u093e\u0917\u094d\u092f' },
+      readingDefaultTitle: '\u0906\u092a\u0915\u0940 \u0939\u0925\u0947\u0932\u0940 \u0915\u094d\u092f\u093e \u0915\u0939\u0924\u0940 \u0939\u0948',
+    },
+  };
+
   // Set to false to bring back the free-preview + $3.99 unlock paywall.
   // Monetization is deferred until the Android build — everything is free right now.
 
   const state = {
+    language: 'en',        // 'en' | 'hi'
     handedness: null,      // 'left' | 'right' (which hand user writes with)
     scanningWhich: null,   // which physical hand we're currently scanning
     facingMode: 'environment',
@@ -589,6 +697,8 @@
     capturedLandmarks: {}, // { left: [...21 points], right: [...21 points] }
     readings: {},          // { left: {title,sections}, right: {title,sections} }
   };
+
+  function t() { return I18N[state.language]; }
 
   const $ = (id) => document.getElementById(id);
   const screens = {
@@ -606,6 +716,36 @@
   }
 
   // ---------- Intro ----------
+  function applyStaticText() {
+    const s = t();
+    $('intro-title').textContent = s.appTitle;
+    $('intro-sub').textContent = s.tagline;
+    $('hand-question-label').textContent = s.handQuestionLabel;
+    $('hand-left-btn').textContent = s.left;
+    $('hand-right-btn').textContent = s.right;
+    $('start-btn').textContent = s.beginBtn;
+    document.querySelector('.choice[data-lang="en"]').textContent = s.langEnglish;
+    document.querySelector('.choice[data-lang="hi"]').textContent = s.langHindi;
+    document.title = s.appTitle + ' — Palm Reading';
+    $('start-analysis-btn').textContent = s.startAnalysisBtn;
+    $('quickinfo-rescan').textContent = s.scanAgainBtn;
+    $('reading-disclaimer').textContent = s.disclaimer;
+    $('compare-eyebrow').textContent = s.compareEyebrow;
+    $('compare-start-over').textContent = s.startOverBtn;
+    $('compare-disclaimer').textContent = s.disclaimer;
+  }
+  applyStaticText();
+
+  document.querySelectorAll('.choice[data-lang]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.choice[data-lang]').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      state.language = btn.dataset.lang;
+      applyStaticText();
+    });
+  });
+  document.querySelector('.choice[data-lang="en"]').classList.add('selected');
+
   document.querySelectorAll('.choice[data-hand]').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.choice[data-hand]').forEach(b => b.classList.remove('selected'));
@@ -640,12 +780,11 @@
   const capCanvas = $('capture-canvas');
 
   function updateScanCopy() {
-    const label = state.scanningWhich === 'left' ? 'left' : 'right';
-    $('scan-hand-name').textContent = `Scan your ${label} palm`;
+    const s = t();
+    const handLabel = s.handLower[state.scanningWhich];
+    $('scan-hand-name').textContent = s.scanHandName(handLabel);
     const isNonDominant = (state.scanningWhich !== state.handedness);
-    $('scan-hint').textContent = isNonDominant
-      ? 'Your natural hand — hold it flat, fingers spread'
-      : 'Your shaping hand — hold it flat, fingers spread';
+    $('scan-hint').textContent = isNonDominant ? s.scanHintNonDominant : s.scanHintDominant;
   }
 
   async function beginScan(which) {
@@ -671,7 +810,7 @@
       initHandsIfNeeded();
       pump();
     } catch (err) {
-      $('status-pill').textContent = 'Camera access needed — check permissions';
+      $('status-pill').textContent = t().cameraError;
     }
   }
 
@@ -732,7 +871,7 @@
     state.lastCaptureReady = false;
     state.lastLandmarks = null;
     $('status-pill').classList.remove('good');
-    $('status-pill').textContent = 'Looking for your palm…';
+    $('status-pill').textContent = t().statusLooking;
     $('shutter').classList.remove('ready');
   }
 
@@ -791,15 +930,16 @@
   }
 
   function updateStatus(ok, heldMs) {
+    const s = t();
     const pill = $('status-pill');
     const shutter = $('shutter');
     if (ok) {
       const secsLeft = Math.max(0, Math.ceil((HOLD_MS - heldMs) / 1000));
-      pill.textContent = secsLeft > 0 ? `Hold still… ${secsLeft}` : 'Capturing…';
+      pill.textContent = secsLeft > 0 ? s.statusHold(secsLeft) : s.statusCapturing;
       pill.classList.add('good');
       shutter.classList.add('ready');
     } else {
-      pill.textContent = 'Center your palm in the outline';
+      pill.textContent = s.statusCenter;
       pill.classList.remove('good');
       shutter.classList.remove('ready');
     }
@@ -845,43 +985,43 @@
   function pct(ratio) { return Math.round(ratio * 100); }
 
   function quickInfoHtml(metrics) {
+    const s = t();
     let shapeText, shapeHeading;
+    const ratioStr = metrics.shapeRatio.toFixed(2);
     if (metrics.shapeRatio > 1.12) {
-      shapeHeading = 'A Water Hand';
-      shapeText = `Your palm is longer than it is wide (about ${metrics.shapeRatio.toFixed(2)} to 1). People call this a "Water hand." It is said to mean you feel things deeply and have a lot of imagination.`;
+      shapeHeading = s.waterHandTitle;
+      shapeText = s.waterHandText(ratioStr);
     } else if (metrics.shapeRatio < 0.98) {
-      shapeHeading = 'An Earth Hand';
-      shapeText = `Your palm is wider than it is long (${metrics.shapeRatio.toFixed(2)} to 1). People call this an "Earth hand." It is said to mean you are practical and steady.`;
+      shapeHeading = s.earthHandTitle;
+      shapeText = s.earthHandText(ratioStr);
     } else {
-      shapeHeading = 'A Balanced Hand';
-      shapeText = `Your palm is close to square (${metrics.shapeRatio.toFixed(2)} to 1). This is a balanced shape. It is said to mean you can adapt easily to new things.`;
+      shapeHeading = s.balancedHandTitle;
+      shapeText = s.balancedHandText(ratioStr);
     }
 
-    let fingerText;
-    if (metrics.fingerToPalmRatio > 0.85) {
-      fingerText = `Your fingers are long compared to your palm (${pct(metrics.fingerToPalmRatio)}% of your palm's length). This is said to mean you are patient and notice small details.`;
-    } else {
-      fingerText = `Your fingers are shorter compared to your palm (${pct(metrics.fingerToPalmRatio)}% of your palm's length). This is said to mean you trust your gut and act fast.`;
-    }
+    const fingerText = metrics.fingerToPalmRatio > 0.85
+      ? s.longFingerText(pct(metrics.fingerToPalmRatio))
+      : s.shortFingerText(pct(metrics.fingerToPalmRatio));
 
     return {
       title: shapeHeading,
       html: `
-        <div class="section"><h3>Hand Shape<span class="rule"></span></h3><p>${escapeHtml(shapeText)}</p></div>
-        <div class="section"><h3>Finger Length<span class="rule"></span></h3><p>${escapeHtml(fingerText)}</p></div>
+        <div class="section"><h3>${escapeHtml(s.handShapeHeading)}<span class="rule"></span></h3><p>${escapeHtml(shapeText)}</p></div>
+        <div class="section"><h3>${escapeHtml(s.fingerLengthHeading)}<span class="rule"></span></h3><p>${escapeHtml(fingerText)}</p></div>
       `,
     };
   }
 
   function showQuickInfo() {
+    const s = t();
     const which = state.scanningWhich;
     const lm = state.capturedLandmarks[which];
     const metrics = computeQuickMetrics(lm);
     show('quickinfo');
-    $('quickinfo-eyebrow').textContent = `YOUR ${which.toUpperCase()} PALM`;
+    $('quickinfo-eyebrow').textContent = s.readingEyebrow(s.handLower[which]);
     if (!metrics) {
-      $('quickinfo-title').textContent = 'A First Look';
-      $('quickinfo-body').innerHTML = `<div class="section"><p>Got the scan — ready for the full analysis whenever you are.</p></div>`;
+      $('quickinfo-title').textContent = s.quickInfoDefaultTitle;
+      $('quickinfo-body').innerHTML = `<div class="section"><p>${escapeHtml(s.quickInfoGotScan)}</p></div>`;
       return;
     }
     const { title, html } = quickInfoHtml(metrics);
@@ -893,21 +1033,6 @@
   $('quickinfo-rescan').addEventListener('click', () => resetAll());
 
   // ---------- Reading (AI vision — reads actual palm lines, small per-scan cost) ----------
-  const readingLoadingLines = [
-    'Tracing your life line…',
-    'Reading the heart line…',
-    'Following the head line…',
-    'Checking your fate line…',
-    'Almost there…',
-  ];
-  const compareLoadingLines = [
-    'Laying both hands side by side…',
-    'Comparing what you were born with…',
-    'Weighing how life has shaped you…',
-    'Finding what changed, and what didn\u2019t…',
-    'Almost there…',
-  ];
-
   function cycleLoadingText(lines) {
     let i = 0;
     $('loading-text').textContent = lines[0];
@@ -921,7 +1046,7 @@
 
   async function requestReading() {
     show('loading');
-    const timer = cycleLoadingText(readingLoadingLines);
+    const timer = cycleLoadingText(t().readingLoadingLines);
     try {
       const res = await fetch('/api/reading', {
         method: 'POST',
@@ -930,6 +1055,7 @@
           image: state.capturedImages[state.scanningWhich],
           scannedHand: state.scanningWhich,
           dominantHand: state.handedness,
+          language: state.language,
         }),
       });
       if (!res.ok) {
@@ -948,7 +1074,7 @@
 
   async function requestComparison() {
     show('loading');
-    const timer = cycleLoadingText(compareLoadingLines);
+    const timer = cycleLoadingText(t().compareLoadingLines);
     const nonDominant = otherHandOf(state.handedness);
     const dominant = state.handedness;
     try {
@@ -960,6 +1086,7 @@
           shapedImage: state.capturedImages[dominant],
           bornHand: nonDominant,
           shapedHand: dominant,
+          language: state.language,
         }),
       });
       if (!res.ok) {
@@ -976,10 +1103,11 @@
   }
 
   function renderError(msg) {
+    const s = t();
     show('reading');
-    $('reading-eyebrow').textContent = 'SOMETHING WENT WRONG';
-    $('reading-title').textContent = 'Couldn\u2019t read your palm';
-    $('reading-body').innerHTML = `<div class="error-box">${escapeHtml(msg)}<br><br>Make sure the API server has ANTHROPIC_API_KEY configured, then try scanning again.</div>`;
+    $('reading-eyebrow').textContent = s.errorEyebrow;
+    $('reading-title').textContent = s.errorTitle;
+    $('reading-body').innerHTML = `<div class="error-box">${escapeHtml(msg)}<br><br>${escapeHtml(s.errorSuffix)}</div>`;
     $('reading-actions').innerHTML = '';
   }
 
@@ -990,19 +1118,20 @@
   }
 
   function renderReadingActions(which) {
+    const s = t();
     const other = otherHandOf(which);
     const actionsEl = $('reading-actions');
 
     if (!state.readings[other]) {
       actionsEl.innerHTML = `
-        <button class="btn-primary" id="scan-other-btn" style="max-width: none;">Scan your other hand too</button>
-        <button class="btn-ghost" id="done-btn">I\u2019m done for now</button>`;
+        <button class="btn-primary" id="scan-other-btn" style="max-width: none;">${escapeHtml(s.scanOtherBtn)}</button>
+        <button class="btn-ghost" id="done-btn">${escapeHtml(s.doneBtn)}</button>`;
       $('scan-other-btn').addEventListener('click', () => beginScan(other));
       $('done-btn').addEventListener('click', () => { actionsEl.innerHTML = ''; });
     } else {
       actionsEl.innerHTML = `
-        <button class="btn-primary" id="compare-btn" style="max-width: none;">Compare: God-Gifted vs. Self-Made</button>
-        <button class="btn-ghost" id="start-over-btn">Start over</button>`;
+        <button class="btn-primary" id="compare-btn" style="max-width: none;">${escapeHtml(s.compareBtn)}</button>
+        <button class="btn-ghost" id="start-over-btn">${escapeHtml(s.startOverBtn)}</button>`;
       $('compare-btn').addEventListener('click', () => requestComparison());
       $('start-over-btn').addEventListener('click', resetAll);
     }
@@ -1041,6 +1170,7 @@
   function buildPhotoOverlay(which, lines) {
     const src = state.capturedImages[which];
     if (!src) return '';
+    const labels = t().lineLegendLabels;
     let paths = '';
     let legend = '';
     (lines || []).forEach(line => {
@@ -1049,7 +1179,7 @@
       const color = LINE_COLORS[key] || 'var(--gold-bright)';
       const d = catmullRomPath(line.points);
       paths += `<path id="line-path-${key}" class="line-path" d="${d}" style="stroke:${color};"></path>`;
-      legend += `<div class="chip"><span class="swatch" style="background:${color};"></span>${LINE_LABELS[key] || key}</div>`;
+      legend += `<div class="chip"><span class="swatch" style="background:${color};"></span>${escapeHtml(labels[key] || key)}</div>`;
     });
     return `
       <div class="photo-frame">
@@ -1086,7 +1216,9 @@
       const para = wrap.querySelector('p');
       heading.classList.add('visible');
 
-      const lineKey = matchLineKey(sec.heading);
+      // Prefer the explicit language-independent key the API returns; fall back
+      // to English keyword matching only for older responses that lack it.
+      const lineKey = sec.key || matchLineKey(sec.heading);
       if (lineKey) {
         const pathEl = document.getElementById(`line-path-${lineKey}`);
         if (pathEl) {
@@ -1102,18 +1234,19 @@
   }
 
   function renderReading(data) {
+    const s = t();
     show('reading');
     const which = state.scanningWhich;
-    $('reading-eyebrow').textContent = `YOUR ${which.toUpperCase()} PALM`;
-    $('reading-title').textContent = data.title || 'What your hand tells';
+    $('reading-eyebrow').textContent = s.readingEyebrow(s.handLower[which]);
+    $('reading-title').textContent = data.title || s.readingDefaultTitle;
 
     // Free for now — monetization comes later with the Android build.
     const sections = data.sections || [];
     const photoHtml = buildPhotoOverlay(which, data.lines);
 
     let sectionsHtml = '';
-    sections.forEach((s, idx) => {
-      sectionsHtml += `<div class="section" data-index="${idx}"><h3>${escapeHtml(s.heading)}<span class="rule"></span></h3><p></p></div>`;
+    sections.forEach((sec, idx) => {
+      sectionsHtml += `<div class="section" data-index="${idx}"><h3>${escapeHtml(sec.heading)}<span class="rule"></span></h3><p></p></div>`;
     });
 
     $('reading-body').innerHTML = photoHtml + sectionsHtml;
@@ -1131,7 +1264,7 @@
 
   function renderCompare(data) {
     show('compare');
-    $('compare-title').textContent = data.title || 'Then & Now';
+    $('compare-title').textContent = data.title || t().compareDefaultTitle;
 
     const sections = data.sections || [];
     let html = '';
