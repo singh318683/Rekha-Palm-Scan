@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<title>Rekha — Palm Reading</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,450;9..144,560&family=Work+Sans:wght@400;500;600&family=Noto+Serif+Devanagari:wght@500;600&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #f2e9d8;
+    --void: #17121f;
+    --void-2: #1f1829;
+    --plum: #3a2b4d;
+    --gold: #c9a24b;
+    --gold-bright: #e6c878;
+    --line: rgba(242, 233, 216, 0.14);
+    --danger: #d97b6c;
+    --line-life: #e6c878;
+    --line-heart: #e08aa0;
+    --line-head: #8ab4e6;
+    --line-fate: #8fd19e;
+    --line-sun: #e0a15c;
+    --line-mercury: #7fd4c9;
+    --line-girdle: #c79ae0;
+    --line-marriage: #f28fc0;
+    --face-forehead: #e6c878;
+    --face-eyebrows: #8fd19e;
+    --face-eyes: #8ab4e6;
+    --face-nose: #e0a15c;
+    --face-mouth: #e08aa0;
+    --face-chin: #c79ae0;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: var(--void);
+    color: var(--ink);
+    font-family: 'Fraunces', 'Noto Serif Devanagari', Georgia, serif;
+    overscroll-behavior: none;
+  }
+
+  body {
+    font-family: 'Work Sans', 'Noto Sans Devanagari', -apple-system, system-ui, sans-serif;
+  }
+
+  h1, h2, h3, .display {
+    font-family: 'Fraunces', 'Noto Serif Devanagari', Georgia, serif;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  #app {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+  }
+  .screen.active { display: flex; }
+
+  /* ---------- Welcome ---------- */
+  #screen-welcome {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 32px;
+    background: radial-gradient(120% 90% at 50% -10%, #2a2038 0%, var(--void) 60%);
+  }
+  #screen-welcome h1 {
+    font-size: 30px;
+    line-height: 1.15;
+    margin: 0 0 14px;
+    color: var(--ink);
+  }
+  .palm-anim-wrap {
+    position: relative;
+    width: 200px;
+    height: 240px;
+    margin-bottom: 30px;
+  }
+  .palm-glow {
+    position: absolute;
+    inset: -30px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,162,75,0.28) 0%, rgba(201,162,75,0) 70%);
+    animation: palmGlowPulse 3.4s ease-in-out infinite;
+  }
+  @keyframes palmGlowPulse {
+    0%, 100% { opacity: 0.55; transform: scale(0.94); }
+    50% { opacity: 1; transform: scale(1.04); }
+  }
+  .palm-anim {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .palm-line {
+    stroke-dasharray: 1;
+    filter: drop-shadow(0 0 5px currentColor);
+    animation: drawPalmLine 4.8s ease-in-out infinite;
+  }
+  #anim-life { animation-delay: 0s; }
+  #anim-heart { animation-delay: 0.5s; }
+  #anim-head { animation-delay: 1s; }
+  #anim-fate { animation-delay: 1.5s; }
+  @keyframes drawPalmLine {
+    0% { stroke-dashoffset: 1; opacity: 0; }
+    12% { opacity: 1; }
+    45% { stroke-dashoffset: 0; opacity: 1; }
+    80% { stroke-dashoffset: 0; opacity: 1; }
+    96% { opacity: 0; }
+    100% { stroke-dashoffset: 1; opacity: 0; }
+  }
+  .palm-sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--gold-bright);
+    box-shadow: 0 0 6px 1px var(--gold-bright);
+    animation: sparkleFloat 3.6s ease-in-out infinite;
+  }
+  .palm-sparkle.s1 { top: 12%; left: 18%; animation-delay: 0.2s; }
+  .palm-sparkle.s2 { top: 30%; right: 10%; animation-delay: 1.4s; }
+  .palm-sparkle.s3 { bottom: 16%; left: 30%; animation-delay: 2.4s; }
+  @keyframes sparkleFloat {
+    0%, 100% { opacity: 0; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-10px); }
+  }
+
+  /* ---------- Intro ---------- */
+  #screen-intro {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 32px;
+    background:
+      radial-gradient(120% 90% at 50% -10%, #2a2038 0%, var(--void) 60%);
+  }
+  .mark {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 28px;
+    opacity: 0.92;
+  }
+  #screen-intro h1 {
+    font-size: 40px;
+    line-height: 1.05;
+    margin: 0 0 14px;
+    color: var(--ink);
+  }
+  .sub {
+    color: #b9aec7;
+    font-size: 16px;
+    line-height: 1.5;
+    max-width: 320px;
+    margin: 0 0 40px;
+  }
+
+  .choice-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+    width: 100%;
+    max-width: 340px;
+  }
+  .choice {
+    flex: 1;
+    padding: 16px 10px;
+    border-radius: 2px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.02);
+    color: var(--ink);
+    font-family: 'Work Sans', 'Noto Sans Devanagari', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .choice.selected {
+    border-color: var(--gold);
+    background: rgba(201, 162, 75, 0.1);
+  }
+  .choice-label {
+    display: block;
+    font-size: 11px;
+    text-transform: none;
+    color: #8f84a3;
+    margin-bottom: 16px;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-primary {
+    margin-top: 18px;
+    width: 100%;
+    max-width: 340px;
+    padding: 16px;
+    border-radius: 2px;
+    border: none;
+    background: var(--gold);
+    color: #21161a;
+    font-family: 'Work Sans', 'Noto Sans Devanagari', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+  }
+  .btn-primary:disabled { opacity: 0.35; }
+  .btn-ghost {
+    margin-top: 12px;
+    background: none;
+    border: none;
+    color: #a99cbf;
+    font-family: 'Work Sans', 'Noto Sans Devanagari', sans-serif;
+    font-size: 14px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    padding: 8px;
+  }
+
+  /* ---------- Scan ---------- */
+  #screen-scan { background: #000; }
+  #video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(1);
+  }
+  #video.mirror { transform: scaleX(-1); }
+  #overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .scan-top {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: max(18px, env(safe-area-inset-top)) 20px 40px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.65), transparent);
+    text-align: center;
+    z-index: 3;
+  }
+  .scan-top .hand-name {
+    font-family: 'Fraunces', 'Noto Serif Devanagari', serif;
+    font-size: 20px;
+    color: var(--gold-bright);
+  }
+  .scan-top .hint {
+    font-size: 13px;
+    color: #d8d0e4;
+    margin-top: 4px;
+  }
+
+  .scan-bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 30px 24px max(30px, env(safe-area-inset-bottom));
+    background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 3;
+  }
+  .status-pill {
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(242,233,216,0.25);
+    font-size: 13px;
+    color: var(--ink);
+    margin-bottom: 20px;
+    background: rgba(20,15,28,0.5);
+    transition: border-color 0.25s, color 0.25s;
+  }
+  .status-pill.good {
+    border-color: var(--gold);
+    color: var(--gold-bright);
+  }
+
+  .shutter {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 3px solid var(--ink);
+    background: transparent;
+    position: relative;
+    cursor: pointer;
+  }
+  .shutter::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    background: var(--ink);
+    transition: transform 0.15s, background 0.15s;
+  }
+  .shutter.ready::after { background: var(--gold); }
+  .shutter:active::after { transform: scale(0.85); }
+
+  .switch-cam {
+    position: absolute;
+    top: max(18px, env(safe-area-inset-top));
+    right: 18px;
+    z-index: 4;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(20,15,28,0.55);
+    border: 1px solid rgba(242,233,216,0.2);
+    color: var(--ink);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .back-btn {
+    position: absolute;
+    top: max(18px, env(safe-area-inset-top));
+    left: 18px;
+    z-index: 4;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(20,15,28,0.55);
+    border: 1px solid rgba(242,233,216,0.2);
+    color: var(--ink);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  /* ---------- Loading ---------- */
+  #screen-loading {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: var(--void);
+    padding: 32px;
+  }
+  .spinner {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 2px solid rgba(201,162,75,0.25);
+    border-top-color: var(--gold);
+    animation: spin 0.9s linear infinite;
+    margin-bottom: 26px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loading-text {
+    font-family: 'Fraunces', 'Noto Serif Devanagari', serif;
+    font-size: 18px;
+    color: #d8d0e4;
+    min-height: 24px;
+  }
+
+  /* ---------- Reading ---------- */
+  #screen-reading, #screen-compare {
+    background: var(--void);
+    overflow-y: auto;
+  }
+  .reading-hero {
+    padding: max(24px, env(safe-area-inset-top)) 24px 26px;
+    background: radial-gradient(140% 100% at 50% 0%, #2a2038 0%, var(--void) 65%);
+    border-bottom: 1px solid var(--line);
+  }
+  .reading-hero .eyebrow {
+    color: var(--gold);
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .reading-hero h2 {
+    font-size: 28px;
+    margin: 0;
+    color: var(--ink);
+  }
+  .reading-body {
+    padding: 26px 24px 10px;
+  }
+  .section {
+    margin-bottom: 30px;
+  }
+  .section h3 {
+    font-size: 17px;
+    color: var(--gold-bright);
+    margin: 0 0 8px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .section h3 .rule {
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+  .section p {
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: #ded5ea;
+    margin: 0;
+  }
+
+  /* Reveal-in for section headings, paced with the typewriter text */
+  .section h3 {
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .section h3.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Photo with traced-line overlay */
+  .photo-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    max-height: 56vh;
+    background: #000;
+    overflow: hidden;
+  }
+  .photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .photo-frame svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .line-path {
+    fill: none;
+    stroke-width: 3;
+    vector-effect: non-scaling-stroke;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 4px currentColor);
+  }
+  .line-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px 24px 4px;
+  }
+  .line-legend .chip {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: #b9aec7;
+  }
+  .line-legend .swatch {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Face reading: glowing point markers instead of traced lines */
+  .feature-point circle {
+    filter: drop-shadow(0 0 5px currentColor);
+  }
+  .feature-point .pulse-ring {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 0.006;
+    vector-effect: non-scaling-stroke;
+    opacity: 0;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .feature-point.visible .pulse-ring {
+    animation: featurePulse 1.6s ease-out;
+  }
+  .feature-point.visible circle.dot {
+    animation: featureDotIn 0.4s ease-out;
+  }
+  @keyframes featurePulse {
+    0% { opacity: 0.9; transform: scale(0.3); }
+    100% { opacity: 0; transform: scale(3.2); }
+  }
+  @keyframes featureDotIn {
+    0% { opacity: 0; transform: scale(0); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .locked {
+    position: relative;
+    padding: 22px 24px 30px;
+    margin: 6px 0 30px;
+    border-top: 1px solid var(--line);
+  }
+  .locked .blur-text {
+    filter: blur(5px);
+    user-select: none;
+    color: #ded5ea;
+    font-size: 15.5px;
+    line-height: 1.65;
+  }
+  .lock-cta {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    background: linear-gradient(to bottom, rgba(23,18,31,0), var(--void) 55%);
+  }
+  .lock-cta .lock-title {
+    font-family: 'Fraunces', 'Noto Serif Devanagari', serif;
+    font-size: 19px;
+    color: var(--gold-bright);
+    margin-bottom: 6px;
+  }
+  .lock-cta .lock-sub {
+    font-size: 13.5px;
+    color: #b9aec7;
+    margin-bottom: 16px;
+    max-width: 260px;
+  }
+  .unlock-btn {
+    padding: 13px 26px;
+    border-radius: 2px;
+    border: 1px solid var(--gold);
+    background: rgba(201,162,75,0.12);
+    color: var(--gold-bright);
+    font-family: 'Work Sans', 'Noto Sans Devanagari', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .reading-footer {
+    padding: 10px 24px max(40px, env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .disclaimer {
+    font-size: 11.5px;
+    color: #6c6280;
+    text-align: center;
+    max-width: 300px;
+    line-height: 1.5;
+    margin-top: 10px;
+  }
+
+  .error-box {
+    margin: 24px;
+    padding: 18px;
+    border: 1px solid rgba(217,123,108,0.4);
+    background: rgba(217,123,108,0.08);
+    color: #e8c3ba;
+    font-size: 14px;
+    border-radius: 2px;
+    line-height: 1.5;
+  }
+
+  @media (min-width: 720px) {
+    #app { max-width: 460px; margin: 0 auto; box-shadow: 0 0 60px rgba(0,0,0,0.5); }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- WELCOME -->
+  <section id="screen-welcome" class="screen active">
+    <div class="palm-anim-wrap">
+      <div class="palm-glow"></div>
+      <svg class="palm-anim" viewBox="0 0 200 240" fill="none">
+        <path class="palm-outline" d="M62 220c-14-18-20-40-20-64V96c0-8 6-14 13-14s13 6 13 14v34M68 128V50c0-9 7-16 16-16s16 7 16 16v66M100 116V34c0-9 7-16 16-16s16 7 16 16v90M132 122V56c0-9 7-16 16-16s16 7 16 16v66c0 40-4 62-24 82-16 16-38 24-62 20-18-3-32-12-42-28"
+          stroke="rgba(242,233,216,0.35)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path class="palm-line" id="anim-life" pathLength="1" d="M68 100c-6 20-8 42-4 66 3 20 10 38 22 52"
+          stroke="var(--line-life)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        <path class="palm-line" id="anim-heart" pathLength="1" d="M56 92c22 6 46 8 70 4 14-2 26-6 36-12"
+          stroke="var(--line-heart)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        <path class="palm-line" id="anim-head" pathLength="1" d="M58 108c24 2 50 0 74-8"
+          stroke="var(--line-head)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        <path class="palm-line" id="anim-fate" pathLength="1" d="M104 190c-2-40-2-80 4-118"
+          stroke="var(--line-fate)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      </svg>
+      <div class="palm-sparkle s1"></div>
+      <div class="palm-sparkle s2"></div>
+      <div class="palm-sparkle s3"></div>
+    </div>
+    <h1 id="welcome-title">Every Hand Tells a Story</h1>
+    <p class="sub" id="welcome-sub">An ancient art, read by AI. Discover what your palm has carried since birth — and what you've shaped since.</p>
+    <button class="btn-primary" id="welcome-continue-btn" style="max-width: 340px;">Begin</button>
+  </section>
+
+  <!-- INTRO -->
+  <section id="screen-intro" class="screen">
+    <svg class="mark" viewBox="0 0 64 64" fill="none">
+      <path d="M20 58c-2-10-2-18 0-24 1-3 1-6-1-10-2-5-1-9 2-9 2 0 3 2 3 5v10M24 24v-14c0-3 1.5-5 3.5-5s3.5 2 3.5 5v13M31 23V8c0-3 1.5-5 3.5-5S38 5 38 8v15M38 24v-9c0-3 1.5-5 3.5-5S45 12 45 15v20c0 14-6 23-13 23-8 0-12-5-14-9" stroke="#c9a24b" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h1 id="intro-title">Rekha</h1>
+    <p class="sub" id="intro-sub">Scan your palm. See what the lines of your hand have carried since birth — and what you've made of them since.</p>
+
+    <div>
+      <div class="choice-row">
+        <button class="choice" data-lang="en">English</button>
+        <button class="choice" data-lang="hi">हिंदी</button>
+      </div>
+    </div>
+
+    <div>
+      <span class="choice-label" id="reading-type-label">What would you like read?</span>
+      <div class="choice-row">
+        <button class="choice" data-type="palm" id="type-palm-btn">Palm</button>
+        <button class="choice" data-type="face" id="type-face-btn">Face</button>
+      </div>
+    </div>
+
+    <div id="hand-question-wrap">
+      <span class="choice-label" id="hand-question-label">Which hand do you write with?</span>
+      <div class="choice-row">
+        <button class="choice" data-hand="left" id="hand-left-btn">Left</button>
+        <button class="choice" data-hand="right" id="hand-right-btn">Right</button>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="start-btn" disabled>Begin the reading</button>
+  </section>
+
+  <!-- SCAN -->
+  <section id="screen-scan" class="screen">
+    <button class="back-btn" id="scan-back">‹</button>
+    <button class="switch-cam" id="switch-cam">⟳</button>
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="overlay"></canvas>
+    <canvas id="capture-canvas" style="display:none;"></canvas>
+
+    <div class="scan-top">
+      <div class="hand-name" id="scan-hand-name">Scan your left palm</div>
+      <div class="hint" id="scan-hint">Hold it flat, fingers spread, inside the outline</div>
+    </div>
+
+    <div class="scan-bottom">
+      <div class="status-pill" id="status-pill">Looking for your palm…</div>
+      <button class="shutter" id="shutter"></button>
+    </div>
+  </section>
+
+  <!-- QUICK INFO (instant, local — shown right after capture) -->
+  <section id="screen-quickinfo" class="screen">
+    <div class="reading-hero">
+      <div class="eyebrow" id="quickinfo-eyebrow">YOUR LEFT PALM</div>
+      <h2 id="quickinfo-title">A First Look</h2>
+    </div>
+    <div class="reading-body" id="quickinfo-body"></div>
+    <div class="reading-footer">
+      <button class="btn-primary" id="start-analysis-btn" style="max-width: none;">Start your analysis</button>
+      <button class="btn-ghost" id="quickinfo-rescan">Scan again</button>
+    </div>
+  </section>
+
+  <!-- LOADING -->
+  <section id="screen-loading" class="screen">
+    <div class="spinner"></div>
+    <div id="loading-text">Tracing your life line…</div>
+  </section>
+
+  <!-- READING -->
+  <section id="screen-reading" class="screen">
+    <div class="reading-hero">
+      <div class="eyebrow" id="reading-eyebrow">YOUR LEFT PALM</div>
+      <h2 id="reading-title">What your hand tells</h2>
+    </div>
+    <div class="reading-body" id="reading-body"></div>
+    <div class="reading-footer">
+      <div id="reading-actions"></div>
+      <div class="disclaimer" id="reading-disclaimer">For reflection and entertainment. Palmistry is a traditional practice, not a scientific or medical assessment.</div>
+    </div>
+  </section>
+
+  <!-- COMPARE -->
+  <section id="screen-compare" class="screen">
+    <div class="reading-hero">
+      <div class="eyebrow" id="compare-eyebrow">GOD-GIFTED VS. SELF-MADE</div>
+      <h2 id="compare-title">Then & Now</h2>
+    </div>
+    <div class="reading-body" id="compare-body"></div>
+    <div class="reading-footer">
+      <button class="btn-ghost" id="compare-start-over">Start over</button>
+      <div class="disclaimer" id="compare-disclaimer">For reflection and entertainment. Palmistry is a traditional practice, not a scientific or medical assessment.</div>
+    </div>
+  </section>
+
+  <!-- FACE READING -->
+  <section id="screen-face-reading" class="screen">
+    <div class="reading-hero">
+      <div class="eyebrow" id="face-eyebrow">YOUR FACE</div>
+      <h2 id="face-title">What your face tells</h2>
+    </div>
+    <div class="reading-body" id="face-body"></div>
+    <div class="reading-footer">
+      <button class="btn-ghost" id="face-start-over">Start over</button>
+      <div class="disclaimer" id="face-disclaimer">For reflection and entertainment. Face reading is a traditional practice, not a scientific or medical assessment.</div>
+    </div>
+  </section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
+<script>
+(function () {
+  'use strict';
+
+  // ---------- Translations ----------
+  const I18N = {
+    en: {
+      appTitle: 'Rekha',
+      tagline: 'Scan your palm. See what the lines of your hand have carried since birth — and what you\u2019ve made of them since.',
+      langEnglish: 'English',
+      langHindi: '\u0939\u093f\u0902\u0926\u0940',
+      handQuestionLabel: 'Which hand do you write with?',
+      left: 'Left',
+      right: 'Right',
+      beginBtn: 'Begin the reading',
+      scanHandName: (handLabel) => `Scan your ${handLabel} palm`,
+      handLower: { left: 'left', right: 'right' },
+      scanHintNonDominant: 'Your natural hand — hold it flat, fingers spread',
+      scanHintDominant: 'Your shaping hand — hold it flat, fingers spread',
+      statusLooking: 'Looking for your palm…',
+      statusCenter: 'Center your palm in the outline',
+      statusHold: (n) => `Hold still… ${n}`,
+      statusCapturing: 'Capturing…',
+      cameraError: 'Camera access needed — check permissions',
+      quickInfoDefaultTitle: 'A First Look',
+      quickInfoGotScan: 'Got the scan — ready for the full analysis whenever you are.',
+      handShapeHeading: 'Hand Shape',
+      fingerLengthHeading: 'Finger Length',
+      waterHandTitle: 'A Water Hand',
+      earthHandTitle: 'An Earth Hand',
+      balancedHandTitle: 'A Balanced Hand',
+      waterHandText: (r) => `Your palm is longer than it is wide (about ${r} to 1). People call this a "Water hand." It is said to mean you feel things deeply and have a lot of imagination.`,
+      earthHandText: (r) => `Your palm is wider than it is long (${r} to 1). People call this an "Earth hand." It is said to mean you are practical and steady.`,
+      balancedHandText: (r) => `Your palm is close to square (${r} to 1). This is a balanced shape. It is said to mean you can adapt easily to new things.`,
+      longFingerText: (p) => `Your fingers are long compared to your palm (${p}% of your palm's length). This is said to mean you are patient and notice small details.`,
+      shortFingerText: (p) => `Your fingers are shorter compared to your palm (${p}% of your palm's length). This is said to mean you trust your gut and act fast.`,
+      startAnalysisBtn: 'Start your analysis',
+      scanAgainBtn: 'Scan again',
+      readingLoadingLines: ['Tracing your life line…', 'Reading the heart line…', 'Following the head line…', 'Checking your fate line…', 'Almost there…'],
+      compareLoadingLines: ['Laying both hands side by side…', 'Comparing what you were born with…', 'Weighing how life has shaped you…', 'Finding what changed, and what didn\u2019t…', 'Almost there…'],
+      readingEyebrow: (handLabel) => `YOUR ${handLabel.toUpperCase()} PALM`,
+      errorEyebrow: 'SOMETHING WENT WRONG',
+      errorTitle: 'Couldn\u2019t read your palm',
+      errorSuffix: 'Make sure the API server has ANTHROPIC_API_KEY configured, then try scanning again.',
+      scanOtherBtn: 'Scan your other hand too',
+      doneBtn: 'I\u2019m done for now',
+      compareBtn: 'Compare: God-Gifted vs. Self-Made',
+      startOverBtn: 'Start over',
+      disclaimer: 'For reflection and entertainment. Palmistry is a traditional practice, not a scientific or medical assessment.',
+      compareEyebrow: 'GOD-GIFTED VS. SELF-MADE',
+      compareDefaultTitle: 'Then & Now',
+      lineLegendLabels: { life: 'Life', heart: 'Heart', head: 'Head', fate: 'Fate', sun: 'Sun', mercury: 'Mercury', girdle: 'Girdle', marriage: 'Marriage' },
+      readingDefaultTitle: 'What your hand tells',
+      welcomeTitle: 'Every Hand Tells a Story',
+      welcomeSub: 'An ancient art, read by AI. Discover what your palm has carried since birth — and what you\u2019ve shaped since.',
+      welcomeContinueBtn: 'Begin',
+      readingTypeLabel: 'What would you like read?',
+      typePalm: 'Palm',
+      typeFace: 'Face',
+      faceScanHint: 'Center your face in the outline, then tap to capture',
+      faceScanTitle: 'Scan your face',
+      faceEyebrow: 'YOUR FACE',
+      faceDefaultTitle: 'What your face tells',
+      faceLoadingLines: ['Looking at your forehead…', 'Reading your eyes…', 'Studying your nose and mouth…', 'Considering your chin…', 'Almost there…'],
+      faceDisclaimer: 'For reflection and entertainment. Face reading is a traditional practice, not a scientific or medical assessment.',
+      faceLegendLabels: { forehead: 'Forehead', eyebrows: 'Eyebrows', eyes: 'Eyes', nose: 'Nose', mouth: 'Mouth', chin: 'Chin' },
+    },
+    hi: {
+      appTitle: '\u0930\u0947\u0916\u093e',
+      tagline: '\u0905\u092a\u0928\u0940 \u0939\u0925\u0947\u0932\u0940 \u0915\u094b \u0938\u094d\u0915\u0948\u0928 \u0915\u0930\u0947\u0902\u0964 \u0926\u0947\u0916\u0947\u0902 \u0915\u093f \u0906\u092a\u0915\u0947 \u0939\u093e\u0925 \u0915\u0940 \u0930\u0947\u0916\u093e\u090f\u0902 \u091c\u0928\u094d\u092e \u0938\u0947 \u0915\u094d\u092f\u093e \u0932\u0947\u0915\u0930 \u0906\u0908 \u0939\u0948\u0902 — \u0914\u0930 \u0906\u092a\u0928\u0947 \u0909\u0928\u0938\u0947 \u0905\u092c \u0924\u0915 \u0915\u094d\u092f\u093e \u092c\u0928\u093e\u092f\u093e \u0939\u0948\u0964',
+      langEnglish: 'English',
+      langHindi: '\u0939\u093f\u0902\u0926\u0940',
+      handQuestionLabel: '\u0906\u092a \u0915\u093f\u0938 \u0939\u093e\u0925 \u0938\u0947 \u0932\u093f\u0916\u0924\u0947 \u0939\u0948\u0902?',
+      left: '\u092c\u093e\u092f\u093e\u0901',
+      right: '\u0926\u093e\u092f\u093e\u0901',
+      beginBtn: '\u0930\u0940\u0921\u093f\u0902\u0917 \u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902',
+      scanHandName: (handLabel) => `${handLabel} \u0939\u0925\u0947\u0932\u0940 \u0915\u094b \u0938\u094d\u0915\u0948\u0928 \u0915\u0930\u0947\u0902`,
+      handLower: { left: '\u092c\u093e\u092f\u0940\u0902', right: '\u0926\u093e\u092f\u0940\u0902' },
+      scanHintNonDominant: '\u0906\u092a\u0915\u093e \u091c\u0928\u094d\u092e\u091c\u093e\u0924 \u0939\u093e\u0925 — \u0907\u0938\u0947 \u0938\u0940\u0927\u093e \u0930\u0916\u0947\u0902, \u0909\u0902\u0917\u0932\u093f\u092f\u093e\u0902 \u092b\u0948\u0932\u093e\u090f\u0902',
+      scanHintDominant: '\u0906\u092a\u0915\u093e \u0905\u0928\u0941\u092d\u0935 \u0935\u093e\u0932\u093e \u0939\u093e\u0925 — \u0907\u0938\u0947 \u0938\u0940\u0927\u093e \u0930\u0916\u0947\u0902, \u0909\u0902\u0917\u0932\u093f\u092f\u093e\u0902 \u092b\u0948\u0932\u093e\u090f\u0902',
+      statusLooking: '\u0906\u092a\u0915\u0940 \u0939\u0925\u0947\u0932\u0940 \u0922\u0942\u0902\u0922 \u0930\u0939\u0947 \u0939\u0948\u0902…',
+      statusCenter: '\u0905\u092a\u0928\u0940 \u0939\u0925\u0947\u0932\u0940 \u0915\u094b \u0917\u094b\u0932\u0947 \u0915\u0947 \u092c\u0940\u091a \u092e\u0947\u0902 \u0930\u0916\u0947\u0902',
+      statusHold: (n) => `\u0938\u094d\u0925\u093f\u0930 \u0930\u0939\u0947\u0902… ${n}`,
+      statusCapturing: '\u092b\u094b\u091f\u094b \u0932\u0947 \u0930\u0939\u0947 \u0939\u0948\u0902…',
+      cameraError: '\u0915\u0948\u092e\u0930\u093e \u090f\u0915\u094d\u0938\u0947\u0938 \u091a\u093e\u0939\u093f\u090f — \u0915\u0943\u092a\u092f\u093e \u0905\u0928\u0941\u092e\u0924\u093f \u091c\u093e\u0902\u091a\u0947\u0902',
+      quickInfoDefaultTitle: '\u092a\u0939\u0932\u0940 \u091d\u0932\u0915',
+      quickInfoGotScan: '\u0938\u094d\u0915\u0948\u0928 \u0939\u094b \u0917\u092f\u093e — \u091c\u092c \u091a\u093e\u0939\u0947\u0902 \u092a\u0942\u0930\u093e \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902\u0964',
+      handShapeHeading: '\u0939\u093e\u0925 \u0915\u093e \u0906\u0915\u093e\u0930',
+      fingerLengthHeading: '\u0909\u0902\u0917\u0932\u093f\u092f\u094b\u0902 \u0915\u0940 \u0932\u0902\u092c\u093e\u0908',
+      waterHandTitle: '\u091c\u0932 \u0939\u093e\u0925 (Water Hand)',
+      earthHandTitle: '\u092a\u0943\u0925\u094d\u0935\u0940 \u0939\u093e\u0925 (Earth Hand)',
+      balancedHandTitle: '\u0938\u0902\u0924\u0941\u0932\u093f\u0924 \u0939\u093e\u0925',
+      waterHandText: (r) => `\u0906\u092a\u0915\u0940 \u0939\u0925\u0947\u0932\u0940 \u091a\u094c\u0921\u093c\u093e\u0908 \u0938\u0947 \u091c\u094d\u092f\u093e\u0926\u093e \u0932\u0902\u092c\u0940 \u0939\u0948 (\u0932\u0917\u092d\u0917 ${r} \u0938\u0947 1)\u0964 \u0907\u0938\u0947 "\u091c\u0932 \u0939\u093e\u0925" \u0915\u0939\u0924\u0947 \u0939\u0948\u0902\u0964 \u0915\u0939\u093e \u091c\u093e\u0924\u093e \u0939\u0948 \u0915\u093f \u0906\u092a \u0917\u0939\u0930\u093e\u0908 \u0938\u0947 \u092e\u0939\u0938\u0942\u0938 \u0915\u0930\u0924\u0947 \u0939\u0948\u0902 \u0914\u0930 \u0906\u092a\u0915\u0940 \u0915\u0932\u094d\u092a\u0928\u093e\u0936\u0915\u094d\u0924\u093f \u0905\u091a\u094d\u091b\u0940 \u0939\u0948\u0964`,
+      earthHandText: (r) => `\u0906\u092a\u0915\u0940 \u0939\u0925\u0947\u0932\u0940 \u0932\u0902\u092c\u093e\u0908 \u0938\u0947 \u091c\u094d\u092f\u093e\u0926\u093e \u091a\u094c\u0921\u093c\u0940 \u0939\u0948 (${r} \u0938\u0947 1)\u0964 \u0907\u0938\u0947 "\u092a\u0943\u0925\u094d\u0935\u0940 \u0939\u093e\u0925" \u0915\u0939\u0924\u0947 \u0939\u0948\u0902\u0964 \u0915\u0939\u093e \u091c\u093e\u0924\u093e \u0939\u0948 \u0915\u093f \u0906\u092a \u0935\u094d\u092f\u093e\u0935\u0939\u093e\u0930\u093f\u0915 \u0914\u0930 \u0938\u094d\u0925\u093f\u0930 \u0938\u094d\u0935\u092d\u093e\u0935 \u0915\u0947 \u0939\u0948\u0902\u0964`,
+      balancedHandText: (r) => `\u0906\u092a\u0915\u0940 \u0939\u0925\u0947\u0932\u0940 \u0932\u0917\u092d\u0917 \u0935\u0930\u094d\u0917 \u0939\u0948 (${r} \u0938\u0947 1)\u0964 \u092f\u0939 \u090f\u0915 \u0938\u0902\u0924\u0941\u0932\u093f\u0924 \u0906\u0915\u093e\u0930 \u0939\u0948\u0964 \u0915\u0939\u093e \u091c\u093e\u0924\u093e \u0939\u0948 \u0915\u093f \u0906\u092a \u0928\u0908 \u091a\u0940\u091c\u094b\u0902 \u0915\u0947 \u0938\u093e\u0925 \u0906\u0938\u093e\u0928\u0940 \u0938\u0947 \u0922\u0932 \u091c\u093e\u0924\u0947 \u0939\u0948\u0902\u0964`,
+      longFingerText: (p) => `\u0906\u092a\u0915\u0940 \u0909\u0902\u0917\u0932\u093f\u092f\u093e\u0902 \u0906\u092a\u0915\u0940 \u0939\u0925\u0947\u0932\u0940 \u0915\u0940 \u0924\u0941\u0932\u0928\u093e \u092e\u0947\u0902 \u0932\u0902\u092c\u0940 \u0939\u0948\u0902 (\u0939\u0925\u0947\u0932\u0940 \u0915\u0940 \u0932\u0902\u092c\u093e\u0908 \u0915\u093e ${p}%)\u0964 \u0915\u0939\u093e \u091c\u093e\u0924\u093e \u0939\u0948 \u0915\u093f \u0906\u092a \u0927\u0948\u0930\u094d\u092f\u0935\u093e\u0928 \u0939\u0948\u0902 \u0914\u0930 \u091b\u094b\u091f\u0940-\u091b\u094b\u091f\u0940 \u092c\u093e\u0924\u094b\u0902 \u092a\u0930 \u0927\u094d\u092f\u093e\u0928 \u0926\u0947\u0924\u0947 \u0939\u0948\u0902\u0964`,
+      shortFingerText: (p) => `\u0906\u092a\u0915\u0940 \u0909\u0902\u0917\u0932\u093f\u092f\u093e\u0902 \u0939\u0925\u0947\u0932\u0940 \u0915\u0940 \u0924\u0941\u0932\u0928\u093e \u092e\u0947\u0902 \u091b\u094b\u091f\u0940 \u0939\u0948\u0902 (\u0939\u0925\u0947\u0932\u0940 \u0915\u0940 \u0932\u0902\u092c\u093e\u0908 \u0915\u093e ${p}%)\u0964 \u0915\u0939\u093e \u091c\u093e\u0924\u093e \u0939\u0948 \u0915\u093f \u0906\u092a \u0905\u092a\u0928\u0947 \u092e\u0928 \u0915\u0940 \u092c\u093e\u0924 \u092a\u0930 \u092d\u0930\u094b\u0938\u093e \u0915\u0930\u0924\u0947 \u0939\u0948\u0902 \u0914\u0930 \u091c\u0932\u094d\u0926\u0940 \u0915\u093e\u092e \u0915\u0930\u0924\u0947 \u0939\u0948\u0902\u0964`,
+      startAnalysisBtn: '\u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902',
+      scanAgainBtn: '\u092b\u093f\u0930 \u0938\u0947 \u0938\u094d\u0915\u0948\u0928 \u0915\u0930\u0947\u0902',
+      readingLoadingLines: ['\u091c\u0940\u0935\u0928 \u0930\u0947\u0916\u093e \u0926\u0947\u0916 \u0930\u0939\u0947 \u0939\u0948\u0902…', '\u0939\u0943\u0926\u092f \u0930\u0947\u0916\u093e \u092a\u0922\u093c \u0930\u0939\u0947 \u0939\u0948\u0902…', '\u092e\u0938\u094d\u0924\u093f\u0937\u094d\u0915 \u0930\u0947\u0916\u093e \u0926\u0947\u0916 \u0930\u0939\u0947 \u0939\u0948\u0902…', '\u092d\u093e\u0917\u094d\u092f \u0930\u0947\u0916\u093e \u091c\u093e\u0902\u091a \u0930\u0939\u0947 \u0939\u0948\u0902…', '\u0932\u0917\u092d\u0917 \u0924\u0948\u092f\u093e\u0930…'],
+      compareLoadingLines: ['\u0926\u094b\u0928\u094b\u0902 \u0939\u093e\u0925 \u0938\u093e\u0925 \u0930\u0916 \u0930\u0939\u0947 \u0939\u0948\u0902…', '\u0926\u0947\u0916 \u0930\u0939\u0947 \u0939\u0948\u0902 \u0906\u092a \u091c\u0928\u094d\u092e \u0938\u0947 \u0915\u094d\u092f\u093e \u0932\u0947\u0915\u0930 \u0906\u090f…', '\u0926\u0947\u0916 \u0930\u0939\u0947 \u0939\u0948\u0902 \u091c\u0940\u0935\u0928 \u0928\u0947 \u0906\u092a\u0915\u094b \u0915\u0948\u0938\u0947 \u092c\u0926\u0932\u093e…', '\u0916\u094b\u091c \u0930\u0939\u0947 \u0939\u0948\u0902 \u0915\u094d\u092f\u093e \u092c\u0926\u0932\u093e \u0914\u0930 \u0915\u094d\u092f\u093e \u0935\u0948\u0938\u093e \u0939\u0940 \u0930\u0939\u093e…', '\u0932\u0917\u092d\u0917 \u0924\u0948\u092f\u093e\u0930…'],
+      readingEyebrow: (handLabel) => `\u0906\u092a\u0915\u0940 ${handLabel} \u0939\u0925\u0947\u0932\u0940`,
+      errorEyebrow: '\u0915\u0941\u091b \u0917\u0932\u0924 \u0939\u094b \u0917\u092f\u093e',
+      errorTitle: '\u0906\u092a\u0915\u0940 \u0939\u0925\u0947\u0932\u0940 \u0928\u0939\u0940\u0902 \u092a\u0922\u093c \u092a\u093e\u090f',
+      errorSuffix: '\u0938\u0941\u0928\u093f\u0936\u094d\u091a\u093f\u0924 \u0915\u0930\u0947\u0902 \u0915\u093f \u0938\u0930\u094d\u0935\u0930 \u092a\u0930 ANTHROPIC_API_KEY \u0938\u0947\u091f \u0939\u0948, \u092b\u093f\u0930 \u0926\u094b\u092c\u093e\u0930\u093e \u0938\u094d\u0915\u0948\u0928 \u0915\u0930\u0947\u0902\u0964',
+      scanOtherBtn: '\u0905\u092a\u0928\u093e \u0926\u0942\u0938\u0930\u093e \u0939\u093e\u0925 \u092d\u0940 \u0938\u094d\u0915\u0948\u0928 \u0915\u0930\u0947\u0902',
+      doneBtn: '\u0905\u092d\u0940 \u0915\u0947 \u0932\u093f\u090f \u092c\u0938 \u0907\u0924\u0928\u093e \u0939\u0940',
+      compareBtn: '\u0924\u0941\u0932\u0928\u093e \u0915\u0930\u0947\u0902: \u091c\u0928\u094d\u092e\u091c\u093e\u0924 \u092c\u0928\u093e\u092e \u0906\u0924\u094d\u092e-\u0928\u093f\u0930\u094d\u092e\u093f\u0924',
+      startOverBtn: '\u092b\u093f\u0930 \u0938\u0947 \u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902',
+      disclaimer: '\u092f\u0939 \u0915\u0947\u0935\u0932 \u092e\u0928\u094b\u0930\u0902\u091c\u0928 \u0914\u0930 \u0906\u0924\u094d\u092e-\u091a\u093f\u0902\u0924\u0928 \u0915\u0947 \u0932\u093f\u090f \u0939\u0948\u0964 \u0939\u0938\u094d\u0924\u0930\u0947\u0916\u093e \u0936\u093e\u0938\u094d\u0924\u094d\u0930 \u090f\u0915 \u092a\u0930\u0902\u092a\u0930\u093e\u0917\u0924 \u0935\u093f\u0926\u094d\u092f\u093e \u0939\u0948, \u0935\u0948\u091c\u094d\u091e\u093e\u0928\u093f\u0915 \u092f\u093e \u091a\u093f\u0915\u093f\u0924\u094d\u0938\u093e \u0938\u0932\u093e\u0939 \u0928\u0939\u0940\u0902\u0964',
+      compareEyebrow: '\u091c\u0928\u094d\u092e\u091c\u093e\u0924 \u092c\u0928\u093e\u092e \u0906\u0924\u094d\u092e-\u0928\u093f\u0930\u094d\u092e\u093f\u0924',
+      compareDefaultTitle: '\u0924\u092c \u0914\u0930 \u0905\u092c',
+      lineLegendLabels: { life: '\u091c\u0940\u0935\u0928', heart: '\u0939\u0943\u0926\u092f', head: '\u092e\u0938\u094d\u0924\u093f\u0937\u094d\u0915', fate: '\u092d\u093e\u0917\u094d\u092f', sun: '\u0938\u0942\u0930\u094d\u092f', mercury: '\u092c\u0941\u0927', girdle: '\u092d\u093e\u0935\u0941\u0915\u0924\u093e', marriage: '\u0935\u093f\u0935\u093e\u0939' },
+      readingDefaultTitle: '\u0906\u092a\u0915\u0940 \u0939\u0925\u0947\u0932\u0940 \u0915\u094d\u092f\u093e \u0915\u0939\u0924\u0940 \u0939\u0948',
+      welcomeTitle: '\u0939\u0930 \u0939\u093e\u0925 \u0915\u0940 \u0905\u092a\u0928\u0940 \u0915\u0939\u093e\u0928\u0940 \u0939\u0948',
+      welcomeSub: '\u090f\u0915 \u092a\u0941\u0930\u093e\u0928\u0940 \u0915\u0932\u093e, \u0905\u092c AI \u0915\u0947 \u0938\u093e\u0925\u0964 \u091c\u093e\u0928\u0947\u0902 \u0906\u092a\u0915\u0940 \u0939\u0925\u0947\u0932\u0940 \u091c\u0928\u094d\u092e \u0938\u0947 \u0915\u094d\u092f\u093e \u0932\u0947\u0915\u0930 \u0906\u0908 \u0939\u0948 — \u0914\u0930 \u0906\u092a\u0928\u0947 \u0909\u0938\u0947 \u0905\u092c \u0915\u094d\u092f\u093e \u092c\u0928\u093e\u092f\u093e \u0939\u0948\u0964',
+      welcomeContinueBtn: '\u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902',
+      readingTypeLabel: '\u0906\u092a \u0915\u094d\u092f\u093e \u092a\u0922\u093c\u0935\u093e\u0928\u093e \u091a\u093e\u0939\u0924\u0947 \u0939\u0948\u0902?',
+      typePalm: '\u0939\u0925\u0947\u0932\u0940',
+      typeFace: '\u091a\u0947\u0939\u0930\u093e',
+      faceScanHint: '\u0905\u092a\u0928\u0947 \u091a\u0947\u0939\u0930\u0947 \u0915\u094b \u0930\u0947\u0916\u093e \u0915\u0947 \u092c\u0940\u091a \u092e\u0947\u0902 \u0930\u0916\u0947\u0902, \u092b\u093f\u0930 \u092b\u094b\u091f\u094b \u0932\u0947\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u091f\u0948\u092a \u0915\u0930\u0947\u0902',
+      faceScanTitle: '\u0905\u092a\u0928\u093e \u091a\u0947\u0939\u0930\u093e \u0938\u094d\u0915\u0948\u0928 \u0915\u0930\u0947\u0902',
+      faceEyebrow: '\u0906\u092a\u0915\u093e \u091a\u0947\u0939\u0930\u093e',
+      faceDefaultTitle: '\u0906\u092a\u0915\u093e \u091a\u0947\u0939\u0930\u093e \u0915\u094d\u092f\u093e \u0915\u0939\u0924\u093e \u0939\u0948',
+      faceLoadingLines: ['\u0906\u092a\u0915\u093e \u092e\u093e\u0925\u093e \u0926\u0947\u0916 \u0930\u0939\u0947 \u0939\u0948\u0902\u2026', '\u0906\u092a\u0915\u0940 \u0906\u0902\u0916\u0947\u0902 \u092a\u0922\u093c \u0930\u0939\u0947 \u0939\u0948\u0902\u2026', '\u0906\u092a\u0915\u0940 \u0928\u093e\u0915 \u0914\u0930 \u0939\u094b\u0902\u0920 \u0926\u0947\u0916 \u0930\u0939\u0947 \u0939\u0948\u0902\u2026', '\u0906\u092a\u0915\u0940 \u0920\u0941\u0921\u094d\u0921\u0940 \u092a\u0930 \u0927\u094d\u092f\u093e\u0928 \u0926\u0947 \u0930\u0939\u0947 \u0939\u0948\u0902\u2026', '\u0932\u0917\u092d\u0917 \u0924\u0948\u092f\u093e\u0930\u2026'],
+      faceDisclaimer: '\u092f\u0939 \u0915\u0947\u0935\u0932 \u092e\u0928\u094b\u0930\u0902\u091c\u0928 \u0914\u0930 \u0906\u0924\u094d\u092e-\u091a\u093f\u0902\u0924\u0928 \u0915\u0947 \u0932\u093f\u090f \u0939\u0948\u0964 \u091a\u0947\u0939\u0930\u093e \u092a\u0922\u093c\u0928\u093e \u090f\u0915 \u092a\u093e\u0930\u0902\u092a\u0930\u093f\u0915 \u0935\u093f\u0926\u094d\u092f\u093e \u0939\u0948, \u0935\u0948\u091c\u094d\u091e\u093e\u0928\u093f\u0915 \u092f\u093e \u091a\u093f\u0915\u093f\u0924\u094d\u0938\u093e \u0938\u0932\u093e\u0939 \u0928\u0939\u0940\u0902\u0964',
+      faceLegendLabels: { forehead: '\u092e\u093e\u0925\u093e', eyebrows: '\u092d\u094c\u0939\u0947\u0902', eyes: '\u0906\u0902\u0916\u0947\u0902', nose: '\u0928\u093e\u0915', mouth: '\u092e\u0941\u0902\u0939', chin: '\u0920\u0941\u0921\u094d\u0921\u0940' },
+    },
+  };
+
+  // Set to false to bring back the free-preview + $3.99 unlock paywall.
+  // Monetization is deferred until the Android build — everything is free right now.
+
+  const state = {
+    language: 'en',        // 'en' | 'hi'
+    readingType: 'palm',   // 'palm' | 'face'
+    handedness: null,      // 'left' | 'right' (which hand user writes with)
+    scanningWhich: null,   // which physical hand we're currently scanning
+    facingMode: 'environment',
+    stream: null,
+    hands: null,
+    goodFrames: 0,
+    lastCaptureReady: false,
+    lastLandmarks: null,
+    capturedImages: {},    // { left: base64, right: base64 }
+    capturedLandmarks: {}, // { left: [...21 points], right: [...21 points] }
+    readings: {},          // { left: {title,sections}, right: {title,sections} }
+    faceImage: null,       // base64 captured face photo
+  };
+
+  function t() { return I18N[state.language]; }
+
+  const $ = (id) => document.getElementById(id);
+  const screens = {
+    welcome: $('screen-welcome'),
+    intro: $('screen-intro'),
+    scan: $('screen-scan'),
+    quickinfo: $('screen-quickinfo'),
+    loading: $('screen-loading'),
+    reading: $('screen-reading'),
+    compare: $('screen-compare'),
+    faceReading: $('screen-face-reading'),
+  };
+
+  function show(name) {
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[name].classList.add('active');
+  }
+
+  // ---------- Welcome ----------
+  $('welcome-continue-btn').addEventListener('click', () => show('intro'));
+
+  // ---------- Intro ----------
+  function applyStaticText() {
+    const s = t();
+    $('welcome-title').textContent = s.welcomeTitle;
+    $('welcome-sub').textContent = s.welcomeSub;
+    $('welcome-continue-btn').textContent = s.welcomeContinueBtn;
+    $('intro-title').textContent = s.appTitle;
+    $('intro-sub').textContent = s.tagline;
+    $('reading-type-label').textContent = s.readingTypeLabel;
+    $('type-palm-btn').textContent = s.typePalm;
+    $('type-face-btn').textContent = s.typeFace;
+    $('hand-question-label').textContent = s.handQuestionLabel;
+    $('hand-left-btn').textContent = s.left;
+    $('hand-right-btn').textContent = s.right;
+    $('start-btn').textContent = s.beginBtn;
+    document.querySelector('.choice[data-lang="en"]').textContent = s.langEnglish;
+    document.querySelector('.choice[data-lang="hi"]').textContent = s.langHindi;
+    document.title = s.appTitle + ' — Palm Reading';
+    $('start-analysis-btn').textContent = s.startAnalysisBtn;
+    $('quickinfo-rescan').textContent = s.scanAgainBtn;
+    $('reading-disclaimer').textContent = s.disclaimer;
+    $('compare-eyebrow').textContent = s.compareEyebrow;
+    $('compare-start-over').textContent = s.startOverBtn;
+    $('compare-disclaimer').textContent = s.disclaimer;
+    $('face-start-over').textContent = s.startOverBtn;
+    $('face-disclaimer').textContent = s.faceDisclaimer;
+  }
+  applyStaticText();
+
+  document.querySelectorAll('.choice[data-lang]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.choice[data-lang]').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      state.language = btn.dataset.lang;
+      applyStaticText();
+    });
+  });
+  document.querySelector('.choice[data-lang="en"]').classList.add('selected');
+
+  function updateStartButtonState() {
+    const ready = state.readingType === 'face' || !!state.handedness;
+    $('start-btn').disabled = !ready;
+  }
+
+  document.querySelectorAll('.choice[data-type]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.choice[data-type]').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      state.readingType = btn.dataset.type;
+      $('hand-question-wrap').style.display = state.readingType === 'face' ? 'none' : '';
+      updateStartButtonState();
+    });
+  });
+  document.querySelector('.choice[data-type="palm"]').classList.add('selected');
+
+  document.querySelectorAll('.choice[data-hand]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.choice[data-hand]').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      state.handedness = btn.dataset.hand;
+      updateStartButtonState();
+    });
+  });
+
+  $('start-btn').addEventListener('click', () => {
+    if (state.readingType === 'face') {
+      beginFaceScan();
+    } else {
+      state.scanningWhich = state.handedness === 'right' ? 'left' : 'right'; // start with non-dominant hand
+      beginScan(state.scanningWhich);
+    }
+  });
+
+  $('scan-back').addEventListener('click', () => {
+    stopCamera();
+    show('intro');
+  });
+
+  function resetAll() {
+    state.capturedImages = {};
+    state.capturedLandmarks = {};
+    state.readings = {};
+    state.faceImage = null;
+    show('intro');
+  }
+  $('compare-start-over').addEventListener('click', resetAll);
+
+  // ---------- Camera + hand tracking ----------
+  const video = $('video');
+  const overlay = $('overlay');
+  const octx = overlay.getContext('2d');
+  const capCanvas = $('capture-canvas');
+
+  function updateScanCopy() {
+    const s = t();
+    const handLabel = s.handLower[state.scanningWhich];
+    $('scan-hand-name').textContent = s.scanHandName(handLabel);
+    const isNonDominant = (state.scanningWhich !== state.handedness);
+    $('scan-hint').textContent = isNonDominant ? s.scanHintNonDominant : s.scanHintDominant;
+  }
+
+  async function beginScan(which) {
+    state.scanningWhich = which;
+    updateScanCopy();
+    show('scan');
+    resetGuide();
+    await startCamera();
+  }
+
+  async function beginFaceScan() {
+    state.facingMode = 'user';
+    const s = t();
+    $('scan-hand-name').textContent = s.faceScanTitle;
+    $('scan-hint').textContent = s.faceScanHint;
+    show('scan');
+    resetGuide();
+    await startCamera();
+  }
+
+  function drawFaceGuide() {
+    octx.clearRect(0, 0, overlay.width, overlay.height);
+    const w = overlay.width, h = overlay.height;
+    octx.strokeStyle = 'rgba(230,200,120,0.6)';
+    octx.lineWidth = 2;
+    octx.setLineDash([6, 6]);
+    octx.beginPath();
+    octx.ellipse(w * 0.5, h * 0.46, w * 0.28, h * 0.34, 0, 0, Math.PI * 2);
+    octx.stroke();
+    octx.setLineDash([]);
+  }
+
+  async function startCamera() {
+    stopCamera();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: state.facingMode, width: { ideal: 1080 }, height: { ideal: 1440 } },
+        audio: false,
+      });
+      state.stream = stream;
+      video.srcObject = stream;
+      video.classList.toggle('mirror', state.facingMode === 'user');
+      await video.play();
+      sizeOverlay();
+      if (state.readingType === 'face') {
+        // No landmark detection for faces yet — a static guide plus manual capture.
+        $('status-pill').classList.add('good');
+        $('status-pill').textContent = t().faceScanHint;
+        $('shutter').classList.add('ready');
+      } else {
+        initHandsIfNeeded();
+      }
+      pump();
+    } catch (err) {
+      $('status-pill').textContent = t().cameraError;
+    }
+  }
+
+  function stopCamera() {
+    if (state.stream) {
+      state.stream.getTracks().forEach(t => t.stop());
+      state.stream = null;
+    }
+  }
+
+  $('switch-cam').addEventListener('click', () => {
+    state.facingMode = state.facingMode === 'environment' ? 'user' : 'environment';
+    startCamera();
+  });
+
+  function sizeOverlay() {
+    overlay.width = video.clientWidth;
+    overlay.height = video.clientHeight;
+  }
+  window.addEventListener('resize', sizeOverlay);
+
+  function initHandsIfNeeded() {
+    if (state.hands) return;
+    try {
+      state.hands = new Hands({
+        locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${f}`,
+      });
+      state.hands.setOptions({
+        maxNumHands: 1,
+        modelComplexity: 0,
+        minDetectionConfidence: 0.6,
+        minTrackingConfidence: 0.5,
+      });
+      state.hands.onResults(onResults);
+    } catch (e) {
+      state.hands = null; // fall back to manual capture only
+    }
+  }
+
+  let pumping = false;
+  async function pump() {
+    if (pumping) return;
+    pumping = true;
+    loop();
+  }
+  async function loop() {
+    if (!screens.scan.classList.contains('active')) { pumping = false; return; }
+    if (state.readingType === 'face') {
+      drawFaceGuide();
+    } else if (state.hands && video.readyState >= 2) {
+      try { await state.hands.send({ image: video }); } catch (e) {}
+    }
+    requestAnimationFrame(loop);
+  }
+
+  const HOLD_MS = 2600; // how long a steady, centered hand must be held before auto-capture
+
+  function resetGuide() {
+    state.okSince = null;
+    state.lastCaptureReady = false;
+    state.lastLandmarks = null;
+    $('status-pill').classList.remove('good');
+    $('status-pill').textContent = t().statusLooking;
+    $('shutter').classList.remove('ready');
+  }
+
+  function onResults(results) {
+    octx.clearRect(0, 0, overlay.width, overlay.height);
+    const w = overlay.width, h = overlay.height;
+
+    // outline guide
+    octx.strokeStyle = 'rgba(230,200,120,0.5)';
+    octx.lineWidth = 2;
+    octx.setLineDash([6, 6]);
+    octx.strokeRect(w * 0.22, h * 0.28, w * 0.56, h * 0.44);
+    octx.setLineDash([]);
+
+    const lm = results.multiHandLandmarks && results.multiHandLandmarks[0];
+    if (!lm) {
+      state.okSince = null;
+      updateStatus(false, 0);
+      return;
+    }
+
+    // draw landmarks
+    octx.fillStyle = '#e6c878';
+    lm.forEach(p => {
+      octx.beginPath();
+      octx.arc((state.facingMode === 'user' ? (1 - p.x) : p.x) * w, p.y * h, 3, 0, Math.PI * 2);
+      octx.fill();
+    });
+
+    // heuristic: hand roughly centered, spans a reasonable area, spread fingers
+    const xs = lm.map(p => p.x), ys = lm.map(p => p.y);
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const minY = Math.min(...ys), maxY = Math.max(...ys);
+    const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+    const spanX = maxX - minX, spanY = maxY - minY;
+
+    const centered = Math.abs(cx - 0.5) < 0.18 && Math.abs(cy - 0.5) < 0.2;
+    const sizedWell = spanX > 0.28 && spanY > 0.28 && spanX < 0.9 && spanY < 0.9;
+
+    const ok = centered && sizedWell;
+
+    if (ok) {
+      state.lastLandmarks = lm;
+      if (state.okSince === null) state.okSince = performance.now();
+    } else {
+      state.okSince = null;
+    }
+
+    const heldMs = state.okSince === null ? 0 : (performance.now() - state.okSince);
+    updateStatus(ok, heldMs);
+
+    if (ok && heldMs >= HOLD_MS && !state.lastCaptureReady) {
+      state.lastCaptureReady = true;
+      doCapture();
+    }
+  }
+
+  function updateStatus(ok, heldMs) {
+    const s = t();
+    const pill = $('status-pill');
+    const shutter = $('shutter');
+    if (ok) {
+      const secsLeft = Math.max(0, Math.ceil((HOLD_MS - heldMs) / 1000));
+      pill.textContent = secsLeft > 0 ? s.statusHold(secsLeft) : s.statusCapturing;
+      pill.classList.add('good');
+      shutter.classList.add('ready');
+    } else {
+      pill.textContent = s.statusCenter;
+      pill.classList.remove('good');
+      shutter.classList.remove('ready');
+    }
+  }
+
+  $('shutter').addEventListener('click', () => doCapture());
+
+  function doCapture() {
+    capCanvas.width = video.videoWidth;
+    capCanvas.height = video.videoHeight;
+    const ctx = capCanvas.getContext('2d');
+    if (state.facingMode === 'user') {
+      ctx.translate(capCanvas.width, 0);
+      ctx.scale(-1, 1);
+    }
+    ctx.drawImage(video, 0, 0, capCanvas.width, capCanvas.height);
+    const dataUrl = capCanvas.toDataURL('image/jpeg', 0.92);
+    stopCamera();
+    if (state.readingType === 'face') {
+      state.faceImage = dataUrl;
+      requestFaceReading();
+    } else {
+      state.capturedImages[state.scanningWhich] = dataUrl;
+      state.capturedLandmarks[state.scanningWhich] = state.lastLandmarks;
+      showQuickInfo();
+    }
+  }
+
+  // ---------- Quick info (instant, local, no API call) ----------
+  function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y, (a.z || 0) - (b.z || 0)); }
+
+  function computeQuickMetrics(lm) {
+    if (!lm) return null;
+    const wrist = lm[0];
+    const palmLength = dist(wrist, lm[9]);
+    const palmWidth = dist(lm[5], lm[17]);
+    const indexLen = dist(lm[5], lm[8]);
+    const middleLen = dist(lm[9], lm[12]);
+    const ringLen = dist(lm[13], lm[16]);
+    const pinkyLen = dist(lm[17], lm[20]);
+    const avgFingerLen = (indexLen + middleLen + ringLen + pinkyLen) / 4;
+    return {
+      shapeRatio: palmLength / palmWidth,
+      fingerToPalmRatio: avgFingerLen / palmLength,
+    };
+  }
+
+  function pct(ratio) { return Math.round(ratio * 100); }
+
+  function quickInfoHtml(metrics) {
+    const s = t();
+    let shapeText, shapeHeading;
+    const ratioStr = metrics.shapeRatio.toFixed(2);
+    if (metrics.shapeRatio > 1.12) {
+      shapeHeading = s.waterHandTitle;
+      shapeText = s.waterHandText(ratioStr);
+    } else if (metrics.shapeRatio < 0.98) {
+      shapeHeading = s.earthHandTitle;
+      shapeText = s.earthHandText(ratioStr);
+    } else {
+      shapeHeading = s.balancedHandTitle;
+      shapeText = s.balancedHandText(ratioStr);
+    }
+
+    const fingerText = metrics.fingerToPalmRatio > 0.85
+      ? s.longFingerText(pct(metrics.fingerToPalmRatio))
+      : s.shortFingerText(pct(metrics.fingerToPalmRatio));
+
+    return {
+      title: shapeHeading,
+      html: `
+        <div class="section"><h3>${escapeHtml(s.handShapeHeading)}<span class="rule"></span></h3><p>${escapeHtml(shapeText)}</p></div>
+        <div class="section"><h3>${escapeHtml(s.fingerLengthHeading)}<span class="rule"></span></h3><p>${escapeHtml(fingerText)}</p></div>
+      `,
+    };
+  }
+
+  function showQuickInfo() {
+    const s = t();
+    const which = state.scanningWhich;
+    const lm = state.capturedLandmarks[which];
+    const metrics = computeQuickMetrics(lm);
+    show('quickinfo');
+    $('quickinfo-eyebrow').textContent = s.readingEyebrow(s.handLower[which]);
+    if (!metrics) {
+      $('quickinfo-title').textContent = s.quickInfoDefaultTitle;
+      $('quickinfo-body').innerHTML = `<div class="section"><p>${escapeHtml(s.quickInfoGotScan)}</p></div>`;
+      return;
+    }
+    const { title, html } = quickInfoHtml(metrics);
+    $('quickinfo-title').textContent = title;
+    $('quickinfo-body').innerHTML = html;
+  }
+
+  $('start-analysis-btn').addEventListener('click', () => requestReading());
+  $('quickinfo-rescan').addEventListener('click', () => resetAll());
+
+  // ---------- Reading (AI vision — reads actual palm lines, small per-scan cost) ----------
+  function cycleLoadingText(lines) {
+    let i = 0;
+    $('loading-text').textContent = lines[0];
+    return setInterval(() => {
+      i = (i + 1) % lines.length;
+      $('loading-text').textContent = lines[i];
+    }, 1600);
+  }
+
+  function otherHandOf(h) { return h === 'left' ? 'right' : 'left'; }
+
+  async function requestReading() {
+    show('loading');
+    const timer = cycleLoadingText(t().readingLoadingLines);
+    try {
+      const res = await fetch('/api/reading', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: state.capturedImages[state.scanningWhich],
+          scannedHand: state.scanningWhich,
+          dominantHand: state.handedness,
+          language: state.language,
+        }),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.error || `Reading failed (${res.status})`);
+      }
+      const data = await res.json();
+      clearInterval(timer);
+      state.readings[state.scanningWhich] = data;
+      renderReading(data);
+    } catch (err) {
+      clearInterval(timer);
+      renderError(err.message);
+    }
+  }
+
+  async function requestComparison() {
+    show('loading');
+    const timer = cycleLoadingText(t().compareLoadingLines);
+    const nonDominant = otherHandOf(state.handedness);
+    const dominant = state.handedness;
+    try {
+      const res = await fetch('/api/compare', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bornImage: state.capturedImages[nonDominant],
+          shapedImage: state.capturedImages[dominant],
+          bornHand: nonDominant,
+          shapedHand: dominant,
+          language: state.language,
+        }),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.error || `Comparison failed (${res.status})`);
+      }
+      const data = await res.json();
+      clearInterval(timer);
+      renderCompare(data);
+    } catch (err) {
+      clearInterval(timer);
+      renderError(err.message);
+    }
+  }
+
+  function renderError(msg) {
+    const s = t();
+    show('reading');
+    $('reading-eyebrow').textContent = s.errorEyebrow;
+    $('reading-title').textContent = s.errorTitle;
+    $('reading-body').innerHTML = `<div class="error-box">${escapeHtml(msg)}<br><br>${escapeHtml(s.errorSuffix)}</div>`;
+    $('reading-actions').innerHTML = '';
+  }
+
+  function escapeHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function renderReadingActions(which) {
+    const s = t();
+    const other = otherHandOf(which);
+    const actionsEl = $('reading-actions');
+
+    if (!state.readings[other]) {
+      actionsEl.innerHTML = `
+        <button class="btn-primary" id="scan-other-btn" style="max-width: none;">${escapeHtml(s.scanOtherBtn)}</button>
+        <button class="btn-ghost" id="done-btn">${escapeHtml(s.doneBtn)}</button>`;
+      $('scan-other-btn').addEventListener('click', () => beginScan(other));
+      $('done-btn').addEventListener('click', () => { actionsEl.innerHTML = ''; });
+    } else {
+      actionsEl.innerHTML = `
+        <button class="btn-primary" id="compare-btn" style="max-width: none;">${escapeHtml(s.compareBtn)}</button>
+        <button class="btn-ghost" id="start-over-btn">${escapeHtml(s.startOverBtn)}</button>`;
+      $('compare-btn').addEventListener('click', () => requestComparison());
+      $('start-over-btn').addEventListener('click', resetAll);
+    }
+  }
+
+  // ---------- Line overlay + reveal animation ----------
+  const LINE_COLORS = { life: 'var(--line-life)', heart: 'var(--line-heart)', head: 'var(--line-head)', fate: 'var(--line-fate)', sun: 'var(--line-sun)', mercury: 'var(--line-mercury)', girdle: 'var(--line-girdle)', marriage: 'var(--line-marriage)' };
+
+  function catmullRomPath(points) {
+    if (!points || points.length < 2) return '';
+    let d = `M ${points[0][0]} ${points[0][1]} `;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i - 1] || points[i];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[i + 2] || p2;
+      const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+      const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+      const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+      const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+      d += `C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2[0]} ${p2[1]} `;
+    }
+    return d.trim();
+  }
+
+  function matchLineKey(heading) {
+    const h = (heading || '').toLowerCase();
+    if (h.includes('life')) return 'life';
+    if (h.includes('heart')) return 'heart';
+    if (h.includes('head')) return 'head';
+    if (h.includes('fate')) return 'fate';
+    if (h.includes('sun') || h.includes('apollo')) return 'sun';
+    if (h.includes('mercury')) return 'mercury';
+    if (h.includes('girdle') || h.includes('venus')) return 'girdle';
+    if (h.includes('marriage') || h.includes('relationship')) return 'marriage';
+    return null;
+  }
+
+  function buildPhotoOverlay(which, lines) {
+    const src = state.capturedImages[which];
+    if (!src) return '';
+    const labels = t().lineLegendLabels;
+    let paths = '';
+    let legend = '';
+    (lines || []).forEach(line => {
+      if (!line.points || line.points.length < 2) return;
+      const key = line.key;
+      const color = LINE_COLORS[key] || 'var(--gold-bright)';
+      const d = catmullRomPath(line.points);
+      paths += `<path id="line-path-${key}" class="line-path" d="${d}" style="stroke:${color};"></path>`;
+      legend += `<div class="chip"><span class="swatch" style="background:${color};"></span>${escapeHtml(labels[key] || key)}</div>`;
+    });
+    return `
+      <div class="photo-frame">
+        <img src="${src}" alt="Your scanned palm" />
+        <svg viewBox="0 0 1 1" preserveAspectRatio="xMidYMid meet">${paths}</svg>
+      </div>
+      ${legend ? `<div class="line-legend">${legend}</div>` : ''}
+    `;
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function typewriteInto(el, text) {
+    return new Promise(resolve => {
+      const words = (text || '').split(' ');
+      let i = 0;
+      el.textContent = '';
+      function step() {
+        if (i >= words.length) { resolve(); return; }
+        el.textContent += (i === 0 ? '' : ' ') + words[i];
+        i++;
+        setTimeout(step, 34 + Math.random() * 22);
+      }
+      step();
+    });
+  }
+
+  async function revealReading(sections) {
+    for (let idx = 0; idx < sections.length; idx++) {
+      const sec = sections[idx];
+      const wrap = document.querySelector(`#reading-body .section[data-index="${idx}"]`);
+      if (!wrap) continue;
+      const heading = wrap.querySelector('h3');
+      const para = wrap.querySelector('p');
+      heading.classList.add('visible');
+
+      // Prefer the explicit language-independent key the API returns; fall back
+      // to English keyword matching only for older responses that lack it.
+      const lineKey = sec.key || matchLineKey(sec.heading);
+      if (lineKey) {
+        const pathEl = document.getElementById(`line-path-${lineKey}`);
+        if (pathEl) {
+          pathEl.style.transition = 'stroke-dashoffset 1.2s ease';
+          requestAnimationFrame(() => { pathEl.style.strokeDashoffset = '0'; });
+        }
+      }
+
+      await sleep(250);
+      await typewriteInto(para, sec.text);
+      await sleep(260);
+    }
+  }
+
+  function renderReading(data) {
+    const s = t();
+    show('reading');
+    const which = state.scanningWhich;
+    $('reading-eyebrow').textContent = s.readingEyebrow(s.handLower[which]);
+    $('reading-title').textContent = data.title || s.readingDefaultTitle;
+
+    // Free for now — monetization comes later with the Android build.
+    const sections = data.sections || [];
+    const photoHtml = buildPhotoOverlay(which, data.lines);
+
+    let sectionsHtml = '';
+    sections.forEach((sec, idx) => {
+      sectionsHtml += `<div class="section" data-index="${idx}"><h3>${escapeHtml(sec.heading)}<span class="rule"></span></h3><p></p></div>`;
+    });
+
+    $('reading-body').innerHTML = photoHtml + sectionsHtml;
+
+    // Prime each traced line as hidden (full dash offset) before the reveal draws it in.
+    document.querySelectorAll('#reading-body .line-path').forEach(p => {
+      const len = p.getTotalLength();
+      p.style.strokeDasharray = len;
+      p.style.strokeDashoffset = len;
+    });
+
+    renderReadingActions(which);
+    revealReading(sections);
+  }
+
+  function renderCompare(data) {
+    show('compare');
+    $('compare-title').textContent = data.title || t().compareDefaultTitle;
+
+    const sections = data.sections || [];
+    let html = '';
+    sections.forEach(s => {
+      html += `<div class="section"><h3>${escapeHtml(s.heading)}<span class="rule"></span></h3><p>${escapeHtml(s.text)}</p></div>`;
+    });
+    $('compare-body').innerHTML = html;
+  }
+
+  // ---------- Face reading ----------
+  const FACE_COLORS = {
+    forehead: 'var(--face-forehead)',
+    eyebrows: 'var(--face-eyebrows)',
+    eyes: 'var(--face-eyes)',
+    nose: 'var(--face-nose)',
+    mouth: 'var(--face-mouth)',
+    chin: 'var(--face-chin)',
+  };
+
+  function buildFacePhotoOverlay(points) {
+    if (!state.faceImage) return '';
+    const labels = t().faceLegendLabels;
+    let markers = '';
+    let legend = '';
+    (points || []).forEach(pt => {
+      if (!pt.point || pt.point.length < 2) return;
+      const key = pt.key;
+      const color = FACE_COLORS[key] || 'var(--gold-bright)';
+      const [x, y] = pt.point;
+      markers += `<g id="face-point-${key}" class="feature-point" style="color:${color};" transform="translate(${x} ${y})">
+        <circle class="pulse-ring" r="0.03"></circle>
+        <circle class="dot" r="0.012" fill="currentColor"></circle>
+      </g>`;
+      legend += `<div class="chip"><span class="swatch" style="background:${color};"></span>${escapeHtml(labels[key] || key)}</div>`;
+    });
+    return `
+      <div class="photo-frame">
+        <img src="${state.faceImage}" alt="Your scanned face" />
+        <svg viewBox="0 0 1 1" preserveAspectRatio="xMidYMid meet">${markers}</svg>
+      </div>
+      ${legend ? `<div class="line-legend">${legend}</div>` : ''}
+    `;
+  }
+
+  async function revealFaceReading(sections) {
+    for (let idx = 0; idx < sections.length; idx++) {
+      const sec = sections[idx];
+      const wrap = document.querySelector(`#face-body .section[data-index="${idx}"]`);
+      if (!wrap) continue;
+      const heading = wrap.querySelector('h3');
+      const para = wrap.querySelector('p');
+      heading.classList.add('visible');
+
+      if (sec.key) {
+        const markerEl = document.getElementById(`face-point-${sec.key}`);
+        if (markerEl) markerEl.classList.add('visible');
+      }
+
+      await sleep(250);
+      await typewriteInto(para, sec.text);
+      await sleep(260);
+    }
+  }
+
+  async function requestFaceReading() {
+    show('loading');
+    const timer = cycleLoadingText(t().faceLoadingLines);
+    try {
+      const res = await fetch('/api/face-reading', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: state.faceImage,
+          language: state.language,
+        }),
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.error || `Reading failed (${res.status})`);
+      }
+      const data = await res.json();
+      clearInterval(timer);
+      renderFaceReading(data);
+    } catch (err) {
+      clearInterval(timer);
+      renderFaceError(err.message);
+    }
+  }
+
+  function renderFaceError(msg) {
+    const s = t();
+    show('faceReading');
+    $('face-eyebrow').textContent = s.errorEyebrow;
+    $('face-title').textContent = s.errorTitle;
+    $('face-body').innerHTML = `<div class="error-box">${escapeHtml(msg)}<br><br>${escapeHtml(s.errorSuffix)}</div>`;
+  }
+
+  function renderFaceReading(data) {
+    const s = t();
+    show('faceReading');
+    $('face-eyebrow').textContent = s.faceEyebrow;
+    $('face-title').textContent = data.title || s.faceDefaultTitle;
+
+    const sections = data.sections || [];
+    const photoHtml = buildFacePhotoOverlay(data.points);
+
+    let sectionsHtml = '';
+    sections.forEach((sec, idx) => {
+      sectionsHtml += `<div class="section" data-index="${idx}"><h3>${escapeHtml(sec.heading)}<span class="rule"></span></h3><p></p></div>`;
+    });
+
+    $('face-body').innerHTML = photoHtml + sectionsHtml;
+    revealFaceReading(sections);
+  }
+
+  $('face-start-over').addEventListener('click', resetAll);
+
+})();
+</script>
+</body>
+</html>
