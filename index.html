@@ -445,6 +445,25 @@
     object-fit: contain;
     display: block;
   }
+  .photo-frame.small {
+    max-height: none;
+  }
+  .compare-photo-strip {
+    display: flex;
+    gap: 10px;
+    padding: 22px 24px 4px;
+  }
+  .compare-photo-col {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+  }
+  .compare-photo-label {
+    margin-top: 9px;
+    font-family: 'Fraunces', 'Noto Serif Devanagari', serif;
+    font-size: 13px;
+    color: var(--gold-bright);
+  }
   .photo-frame svg {
     position: absolute;
     inset: 0;
@@ -781,6 +800,8 @@
       disclaimer: 'For reflection and entertainment. Palmistry is a traditional practice, not a scientific or medical assessment.',
       compareEyebrow: 'GOD-GIFTED VS. SELF-MADE',
       compareDefaultTitle: 'Then & Now',
+      godGiftedLabel: 'God-Gifted',
+      selfMadeLabel: 'Self-Made',
       lineLegendLabels: { life: 'Life', heart: 'Heart', head: 'Head', fate: 'Fate', sun: 'Sun', mercury: 'Mercury', girdle: 'Girdle', marriage: 'Marriage' },
       readingDefaultTitle: 'What your hand tells',
       welcomeTitle: 'Every Hand Tells a Story',
@@ -842,6 +863,8 @@
       disclaimer: '\u092f\u0939 \u0915\u0947\u0935\u0932 \u092e\u0928\u094b\u0930\u0902\u091c\u0928 \u0914\u0930 \u0906\u0924\u094d\u092e-\u091a\u093f\u0902\u0924\u0928 \u0915\u0947 \u0932\u093f\u090f \u0939\u0948\u0964 \u0939\u0938\u094d\u0924\u0930\u0947\u0916\u093e \u0936\u093e\u0938\u094d\u0924\u094d\u0930 \u090f\u0915 \u092a\u0930\u0902\u092a\u0930\u093e\u0917\u0924 \u0935\u093f\u0926\u094d\u092f\u093e \u0939\u0948, \u0935\u0948\u091c\u094d\u091e\u093e\u0928\u093f\u0915 \u092f\u093e \u091a\u093f\u0915\u093f\u0924\u094d\u0938\u093e \u0938\u0932\u093e\u0939 \u0928\u0939\u0940\u0902\u0964',
       compareEyebrow: '\u091c\u0928\u094d\u092e\u091c\u093e\u0924 \u092c\u0928\u093e\u092e \u0906\u0924\u094d\u092e-\u0928\u093f\u0930\u094d\u092e\u093f\u0924',
       compareDefaultTitle: '\u0924\u092c \u0914\u0930 \u0905\u092c',
+      godGiftedLabel: '\u091c\u0928\u094d\u092e\u091c\u093e\u0924',
+      selfMadeLabel: '\u0906\u0924\u094d\u092e-\u0928\u093f\u0930\u094d\u092e\u093f\u0924',
       lineLegendLabels: { life: '\u091c\u0940\u0935\u0928', heart: '\u0939\u0943\u0926\u092f', head: '\u092e\u0938\u094d\u0924\u093f\u0937\u094d\u0915', fate: '\u092d\u093e\u0917\u094d\u092f', sun: '\u0938\u0942\u0930\u094d\u092f', mercury: '\u092c\u0941\u0927', girdle: '\u092d\u093e\u0935\u0941\u0915\u0924\u093e', marriage: '\u0935\u093f\u0935\u093e\u0939' },
       readingDefaultTitle: '\u0906\u092a\u0915\u0940 \u0939\u0925\u0947\u0932\u0940 \u0915\u094d\u092f\u093e \u0915\u0939\u0924\u0940 \u0939\u0948',
       welcomeTitle: '\u0939\u0930 \u0939\u093e\u0925 \u0915\u0940 \u0905\u092a\u0928\u0940 \u0915\u0939\u093e\u0928\u0940 \u0939\u0948',
@@ -1517,16 +1540,54 @@
     revealReading(sections);
   }
 
+  function buildComparePhotoStrip(nonDominant, dominant) {
+    const s = t();
+    const img1 = state.capturedImages[nonDominant];
+    const img2 = state.capturedImages[dominant];
+    if (!img1 || !img2) return '';
+    return `
+      <div class="compare-photo-strip">
+        <div class="compare-photo-col">
+          <div class="photo-frame small"><img src="${img1}" alt="Your non-dominant hand" /></div>
+          <div class="compare-photo-label">${escapeHtml(s.godGiftedLabel)}</div>
+        </div>
+        <div class="compare-photo-col">
+          <div class="photo-frame small"><img src="${img2}" alt="Your dominant hand" /></div>
+          <div class="compare-photo-label">${escapeHtml(s.selfMadeLabel)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  async function revealCompare(sections) {
+    for (let idx = 0; idx < sections.length; idx++) {
+      const wrap = document.querySelector(`#compare-body .section[data-index="${idx}"]`);
+      if (!wrap) continue;
+      const heading = wrap.querySelector('h3');
+      const para = wrap.querySelector('p');
+      heading.classList.add('visible');
+      await sleep(250);
+      await typewriteInto(para, sections[idx].text);
+      await sleep(260);
+    }
+  }
+
   function renderCompare(data) {
     show('compare');
     $('compare-title').textContent = data.title || t().compareDefaultTitle;
 
+    const nonDominant = otherHandOf(state.handedness);
+    const dominant = state.handedness;
+    const photoHtml = buildComparePhotoStrip(nonDominant, dominant);
+
     const sections = data.sections || [];
-    let html = '';
-    sections.forEach(s => {
-      html += `<div class="section"><h3>${escapeHtml(s.heading)}<span class="rule"></span></h3><p>${escapeHtml(s.text)}</p></div>`;
+    let sectionsHtml = '';
+    sections.forEach((s, idx) => {
+      sectionsHtml += `<div class="section" data-index="${idx}"><h3>${escapeHtml(s.heading)}<span class="rule"></span></h3><p></p></div>`;
     });
-    $('compare-body').innerHTML = html;
+
+    $('compare-body').innerHTML = photoHtml + sectionsHtml;
+    revealCompare(sections);
   }
 
   // ---------- Face reading ----------
