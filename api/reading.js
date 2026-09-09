@@ -54,17 +54,14 @@ Write with warmth and confidence, not hedging like a disclaimer, in the spirit o
 
 ${languageInstruction}
 
-Also include a "lines" array so the app can draw each line on screen. For each line you can ACTUALLY see clearly enough to trace, give 4 to 7 points tracing its course from one end to the other. Each point is [x, y], where x and y are fractions of the image width and height (0.0 = left/top edge, 1.0 = right/bottom edge). Only include a line if you can genuinely trace it in the photo — omit any line that's too faint, cropped out, or unclear; it's normal for several of these to be absent. For marriage lines, trace only the single clearest one if there are several. Use exactly these keys: "life", "heart", "head", "fate", "sun", "mercury", "girdle", "marriage".
+Also include a "lines" array — a simple list of which lines you can genuinely, clearly see well enough to discuss with confidence (not their positions — the app draws each line's position itself from precise hand-tracking data, so you only need to say which ones are present). Use exactly these keys: "life", "heart", "head", "fate", "sun", "mercury", "girdle", "marriage". Omit any line that's too faint, cropped out, or unclear — it's normal for several of these to be absent.
 
 Each section also needs a "key" field using the SAME set of values, or null for the closing "Overall Character" section — this lets the app match each section to its line regardless of what language the heading is written in. This key must always stay in English/lowercase even when the heading and text are in Hindi.
 
 Respond with ONLY valid JSON, no markdown fences, no preamble, in exactly this shape:
 {
   "title": "a short evocative 3-6 word title for this reading",
-  "lines": [
-    { "key": "life", "points": [[0.32, 0.55], [0.30, 0.62], [0.29, 0.70]] },
-    { "key": "heart", "points": [[0.25, 0.30], [0.45, 0.28], [0.65, 0.31]] }
-  ],
+  "lines": ["life", "heart", "head", "sun"],
   "sections": [
     { "key": "life", "heading": "Life Line — Health & Vitality", "text": "2-4 sentences grounded in what you see" },
     { "key": "heart", "heading": "Heart Line — Love & Emotion", "text": "2-4 sentences" },
