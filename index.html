@@ -924,8 +924,10 @@
     lastLandmarks: null,
     capturedImages: {},    // { left: base64, right: base64 }
     capturedLandmarks: {}, // { left: [...21 points], right: [...21 points] }
+    capturedAspect: {},    // { left: width/height, right: width/height } — true capture aspect ratio
     readings: {},          // { left: {title,sections}, right: {title,sections} }
     faceImage: null,       // base64 captured face photo
+    faceAspect: null,      // true capture aspect ratio for the face photo
   };
 
   function t() { return I18N[state.language]; }
@@ -1275,13 +1277,16 @@
     }
     ctx.drawImage(video, 0, 0, capCanvas.width, capCanvas.height);
     const dataUrl = capCanvas.toDataURL('image/jpeg', 0.92);
+    const aspect = capCanvas.width / capCanvas.height;
     stopCamera();
     if (state.readingType === 'face') {
       state.faceImage = dataUrl;
+      state.faceAspect = aspect;
       requestFaceReading();
     } else {
       state.capturedImages[state.scanningWhich] = dataUrl;
       state.capturedLandmarks[state.scanningWhich] = state.lastLandmarks;
+      state.capturedAspect[state.scanningWhich] = aspect;
       showQuickInfo();
     }
   }
@@ -1496,6 +1501,7 @@
   function buildPhotoOverlay(which, lines) {
     const src = state.capturedImages[which];
     if (!src) return '';
+    const aspect = state.capturedAspect[which] || (3 / 4);
     const labels = t().lineLegendLabels;
     let paths = '';
     let legend = '';
@@ -1508,9 +1514,9 @@
       legend += `<div class="chip"><span class="swatch" style="background:${color};"></span>${escapeHtml(labels[key] || key)}</div>`;
     });
     return `
-      <div class="photo-frame">
+      <div class="photo-frame" style="aspect-ratio: ${aspect};">
         <img src="${src}" alt="Your scanned palm" />
-        <svg viewBox="0 0 1 1" preserveAspectRatio="xMidYMid meet">${paths}</svg>
+        <svg viewBox="0 0 1 1" preserveAspectRatio="none">${paths}</svg>
       </div>
       ${legend ? `<div class="line-legend">${legend}</div>` : ''}
     `;
@@ -1593,14 +1599,16 @@
     const img1 = state.capturedImages[nonDominant];
     const img2 = state.capturedImages[dominant];
     if (!img1 || !img2) return '';
+    const aspect1 = state.capturedAspect[nonDominant] || (3 / 4);
+    const aspect2 = state.capturedAspect[dominant] || (3 / 4);
     return `
       <div class="compare-photo-strip">
         <div class="compare-photo-col">
-          <div class="photo-frame small"><img src="${img1}" alt="Your non-dominant hand" /></div>
+          <div class="photo-frame small" style="aspect-ratio: ${aspect1};"><img src="${img1}" alt="Your non-dominant hand" /></div>
           <div class="compare-photo-label">${escapeHtml(s.godGiftedLabel)}</div>
         </div>
         <div class="compare-photo-col">
-          <div class="photo-frame small"><img src="${img2}" alt="Your dominant hand" /></div>
+          <div class="photo-frame small" style="aspect-ratio: ${aspect2};"><img src="${img2}" alt="Your dominant hand" /></div>
           <div class="compare-photo-label">${escapeHtml(s.selfMadeLabel)}</div>
         </div>
       </div>
@@ -1650,6 +1658,7 @@
 
   function buildFacePhotoOverlay(points) {
     if (!state.faceImage) return '';
+    const aspect = state.faceAspect || (3 / 4);
     const labels = t().faceLegendLabels;
     let markers = '';
     let legend = '';
@@ -1658,16 +1667,21 @@
       const key = pt.key;
       const color = FACE_COLORS[key] || 'var(--gold-bright)';
       const [x, y] = pt.point;
+      // Inner scale(1/aspect, 1) compensates for the outer non-uniform stretch
+      // (preserveAspectRatio="none") so the marker renders as a true circle
+      // rather than an ellipse.
       markers += `<g id="face-point-${key}" class="feature-point" style="color:${color};" transform="translate(${x} ${y})">
-        <circle class="pulse-ring" r="0.03"></circle>
-        <circle class="dot" r="0.012" fill="currentColor"></circle>
+        <g transform="scale(${1 / aspect}, 1)">
+          <circle class="pulse-ring" r="0.03"></circle>
+          <circle class="dot" r="0.012" fill="currentColor"></circle>
+        </g>
       </g>`;
       legend += `<div class="chip"><span class="swatch" style="background:${color};"></span>${escapeHtml(labels[key] || key)}</div>`;
     });
     return `
-      <div class="photo-frame">
+      <div class="photo-frame" style="aspect-ratio: ${aspect};">
         <img src="${state.faceImage}" alt="Your scanned face" />
-        <svg viewBox="0 0 1 1" preserveAspectRatio="xMidYMid meet">${markers}</svg>
+        <svg viewBox="0 0 1 1" preserveAspectRatio="none">${markers}</svg>
       </div>
       ${legend ? `<div class="line-legend">${legend}</div>` : ''}
     `;
