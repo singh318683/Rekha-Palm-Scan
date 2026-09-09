@@ -925,6 +925,7 @@
     capturedImages: {},    // { left: base64, right: base64 }
     capturedLandmarks: {}, // { left: [...21 points], right: [...21 points] }
     capturedAspect: {},    // { left: width/height, right: width/height } — true capture aspect ratio
+    capturedFacingMode: {}, // { left: 'environment'|'user', right: ... } — needed to un-mirror landmarks correctly
     readings: {},          // { left: {title,sections}, right: {title,sections} }
     faceImage: null,       // base64 captured face photo
     faceAspect: null,      // true capture aspect ratio for the face photo
@@ -1287,6 +1288,7 @@
       state.capturedImages[state.scanningWhich] = dataUrl;
       state.capturedLandmarks[state.scanningWhich] = state.lastLandmarks;
       state.capturedAspect[state.scanningWhich] = aspect;
+      state.capturedFacingMode[state.scanningWhich] = state.facingMode;
       showQuickInfo();
     }
   }
@@ -1498,18 +1500,97 @@
     return null;
   }
 
-  function buildPhotoOverlay(which, lines) {
+  // ---------- Geometric line positions ----------
+  // The AI is good at judging WHICH lines are present, but unreliable at
+  // pinpointing exact pixel coordinates. Instead, we compute each line's
+  // approximate position from the real MediaPipe hand landmarks captured
+  // during the scan — anchored to genuine, accurately-detected hand
+  // structure rather than the model's guess.
+  function flipIfNeeded(p, facingMode) {
+    return facingMode === 'user' ? { x: 1 - p.x, y: p.y } : p;
+  }
+  function lerpPt(a, b, frac) {
+    return { x: a.x + (b.x - a.x) * frac, y: a.y + (b.y - a.y) * frac };
+  }
+
+  function geometricLinePoints(key, lm, facingMode) {
+    if (!lm || lm.length < 21) return null;
+    const fl = (i) => flipIfNeeded(lm[i], facingMode);
+    const wrist = fl(0), thumbCmc = fl(1), thumbMcp = fl(2), indexMcp = fl(5),
+          middleMcp = fl(9), ringMcp = fl(13), pinkyMcp = fl(17);
+    const toArr = (p) => [p.x, p.y];
+
+    switch (key) {
+      case 'life': {
+        const a = lerpPt(indexMcp, thumbMcp, 0.35);
+        const b = lerpPt(thumbMcp, thumbCmc, 0.55);
+        const c = lerpPt(thumbCmc, wrist, 0.6);
+        const d = lerpPt(wrist, pinkyMcp, 0.12);
+        return [a, b, c, d].map(toArr);
+      }
+      case 'heart': {
+        const a = lerpPt(pinkyMcp, wrist, 0.16);
+        const b = lerpPt(ringMcp, wrist, 0.13);
+        const c = lerpPt(middleMcp, wrist, 0.11);
+        const d = lerpPt(indexMcp, wrist, 0.10);
+        return [a, b, c, d].map(toArr);
+      }
+      case 'head': {
+        const a = lerpPt(indexMcp, wrist, 0.32);
+        const b = lerpPt(middleMcp, wrist, 0.36);
+        const c = lerpPt(ringMcp, wrist, 0.40);
+        return [a, b, c].map(toArr);
+      }
+      case 'fate': {
+        const a = lerpPt(wrist, middleMcp, 0.15);
+        const b = lerpPt(wrist, middleMcp, 0.55);
+        const c = lerpPt(wrist, middleMcp, 0.88);
+        return [a, b, c].map(toArr);
+      }
+      case 'sun': {
+        const a = lerpPt(wrist, ringMcp, 0.25);
+        const b = lerpPt(wrist, ringMcp, 0.6);
+        const c = lerpPt(wrist, ringMcp, 0.9);
+        return [a, b, c].map(toArr);
+      }
+      case 'mercury': {
+        const a = lerpPt(wrist, pinkyMcp, 0.25);
+        const b = lerpPt(wrist, pinkyMcp, 0.6);
+        const c = lerpPt(wrist, pinkyMcp, 0.88);
+        return [a, b, c].map(toArr);
+      }
+      case 'girdle': {
+        const a = lerpPt(middleMcp, wrist, 0.06);
+        const b = lerpPt(ringMcp, wrist, 0.05);
+        const c = lerpPt(pinkyMcp, wrist, 0.07);
+        return [a, b, c].map(toArr);
+      }
+      case 'marriage': {
+        const base = lerpPt(pinkyMcp, wrist, 0.14);
+        const inward = lerpPt(pinkyMcp, indexMcp, 0.12);
+        const a = lerpPt(base, inward, 0.0);
+        const b = lerpPt(base, inward, 0.5);
+        return [a, b].map(toArr);
+      }
+      default:
+        return null;
+    }
+  }
+
+  function buildPhotoOverlay(which, lineKeys) {
     const src = state.capturedImages[which];
     if (!src) return '';
     const aspect = state.capturedAspect[which] || (3 / 4);
+    const lm = state.capturedLandmarks[which];
+    const facingMode = state.capturedFacingMode[which] || 'environment';
     const labels = t().lineLegendLabels;
     let paths = '';
     let legend = '';
-    (lines || []).forEach(line => {
-      if (!line.points || line.points.length < 2) return;
-      const key = line.key;
+    (lineKeys || []).forEach(key => {
+      const pts = geometricLinePoints(key, lm, facingMode);
+      if (!pts || pts.length < 2) return;
       const color = LINE_COLORS[key] || 'var(--gold-bright)';
-      const d = catmullRomPath(line.points);
+      const d = catmullRomPath(pts);
       paths += `<path id="line-path-${key}" class="line-path" d="${d}" style="stroke:${color};"></path>`;
       legend += `<div class="chip"><span class="swatch" style="background:${color};"></span>${escapeHtml(labels[key] || key)}</div>`;
     });
