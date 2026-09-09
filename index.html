@@ -267,6 +267,27 @@
     color: #d8d0e4;
     margin-top: 4px;
   }
+  .hand-toggle-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .hand-toggle {
+    padding: 6px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(242,233,216,0.25);
+    background: rgba(20,15,28,0.5);
+    color: #d8d0e4;
+    font-family: 'Work Sans', 'Noto Sans Devanagari', sans-serif;
+    font-size: 12.5px;
+    cursor: pointer;
+  }
+  .hand-toggle.selected {
+    border-color: var(--gold);
+    color: var(--gold-bright);
+    background: rgba(201,162,75,0.14);
+  }
 
   .scan-bottom {
     position: absolute;
@@ -680,6 +701,10 @@
     <div class="scan-top">
       <div class="hand-name" id="scan-hand-name">Scan your left palm</div>
       <div class="hint" id="scan-hint">Hold it flat, fingers spread, inside the outline</div>
+      <div class="hand-toggle-row" id="hand-toggle-wrap">
+        <button class="hand-toggle" data-toggle-hand="left" id="hand-toggle-left">Left</button>
+        <button class="hand-toggle" data-toggle-hand="right" id="hand-toggle-right">Right</button>
+      </div>
     </div>
 
     <div class="scan-bottom">
@@ -930,6 +955,8 @@
     const s = t();
     $('welcome-title').textContent = s.welcomeTitle;
     $('welcome-sub').textContent = s.welcomeSub;
+    $('hand-toggle-left').textContent = s.left;
+    $('hand-toggle-right').textContent = s.right;
     $('welcome-continue-btn').textContent = s.welcomeContinueBtn;
     $('intro-title').textContent = s.appTitle;
     $('intro-sub').textContent = s.tagline;
@@ -1018,6 +1045,22 @@
   const octx = overlay.getContext('2d');
   const capCanvas = $('capture-canvas');
 
+  function updateHandToggleUI() {
+    $('hand-toggle-left').classList.toggle('selected', state.scanningWhich === 'left');
+    $('hand-toggle-right').classList.toggle('selected', state.scanningWhich === 'right');
+  }
+
+  function setScanningWhich(which) {
+    if (state.scanningWhich === which) return;
+    state.scanningWhich = which;
+    updateScanCopy();
+    updateHandToggleUI();
+  }
+
+  document.querySelectorAll('.hand-toggle[data-toggle-hand]').forEach(btn => {
+    btn.addEventListener('click', () => setScanningWhich(btn.dataset.toggleHand));
+  });
+
   function updateScanCopy() {
     const s = t();
     const handLabel = s.handLower[state.scanningWhich];
@@ -1028,6 +1071,10 @@
 
   async function beginScan(which) {
     state.scanningWhich = which;
+    $('hand-toggle-wrap').style.display = '';
+    $('hand-toggle-left').textContent = t().left;
+    $('hand-toggle-right').textContent = t().right;
+    updateHandToggleUI();
     updateScanCopy();
     show('scan');
     resetGuide();
@@ -1037,6 +1084,7 @@
   async function beginFaceScan() {
     state.facingMode = 'user';
     const s = t();
+    $('hand-toggle-wrap').style.display = 'none';
     $('scan-hand-name').textContent = s.faceScanTitle;
     $('scan-hint').textContent = s.faceScanHint;
     show('scan');
