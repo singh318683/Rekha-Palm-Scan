@@ -499,6 +499,35 @@
     stroke-linejoin: round;
     filter: drop-shadow(0 0 4px currentColor);
   }
+  .diagram-frame {
+    padding: 24px 24px 4px;
+    display: flex;
+    justify-content: center;
+  }
+  .diagram-svg {
+    width: 100%;
+    max-width: 260px;
+    height: auto;
+  }
+  .diagram-outline {
+    fill: none;
+    stroke: rgba(242,233,216,0.35);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .diagram-line {
+    fill: none;
+    stroke-width: 4;
+    stroke-linecap: round;
+    opacity: 0.28;
+    filter: none;
+    transition: opacity 0.5s ease, filter 0.5s ease;
+  }
+  .diagram-line.active {
+    opacity: 1;
+    filter: drop-shadow(0 0 5px currentColor);
+  }
   .line-legend {
     display: flex;
     flex-wrap: wrap;
@@ -1470,23 +1499,6 @@
   // ---------- Line overlay + reveal animation ----------
   const LINE_COLORS = { life: 'var(--line-life)', heart: 'var(--line-heart)', head: 'var(--line-head)', fate: 'var(--line-fate)', sun: 'var(--line-sun)', mercury: 'var(--line-mercury)', girdle: 'var(--line-girdle)', marriage: 'var(--line-marriage)' };
 
-  function catmullRomPath(points) {
-    if (!points || points.length < 2) return '';
-    let d = `M ${points[0][0]} ${points[0][1]} `;
-    for (let i = 0; i < points.length - 1; i++) {
-      const p0 = points[i - 1] || points[i];
-      const p1 = points[i];
-      const p2 = points[i + 1];
-      const p3 = points[i + 2] || p2;
-      const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
-      const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
-      const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
-      const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
-      d += `C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2[0]} ${p2[1]} `;
-    }
-    return d.trim();
-  }
-
   function matchLineKey(heading) {
     const h = (heading || '').toLowerCase();
     if (h.includes('life')) return 'life';
@@ -1500,106 +1512,41 @@
     return null;
   }
 
-  // ---------- Geometric line positions ----------
-  // The AI is good at judging WHICH lines are present, but unreliable at
-  // pinpointing exact pixel coordinates. Instead, we compute each line's
-  // approximate position from the real MediaPipe hand landmarks captured
-  // during the scan — anchored to genuine, accurately-detected hand
-  // structure rather than the model's guess.
-  function flipIfNeeded(p, facingMode) {
-    return facingMode === 'user' ? { x: 1 - p.x, y: p.y } : p;
-  }
-  function lerpPt(a, b, frac) {
-    return { x: a.x + (b.x - a.x) * frac, y: a.y + (b.y - a.y) * frac };
-  }
+  // ---------- Fixed reference diagram ----------
+  // A universal, identical-for-everyone palm diagram, rather than trying to
+  // trace lines onto the person's actual photo (AI vision models are good at
+  // judging what a line looks like, but unreliable at pinpointing exact pixel
+  // coordinates). The diagram teaches where each line generically sits; the
+  // text alongside it stays fully grounded in what the AI actually saw.
+  const DIAGRAM_PATHS = {
+    life: 'M68 100c-6 20-8 42-4 66 3 20 10 38 22 52',
+    heart: 'M56 92c22 6 46 8 70 4 14-2 26-6 36-12',
+    head: 'M58 108c24 2 50 0 74-8',
+    fate: 'M104 190c-2-40-2-80 4-118',
+    sun: 'M128 165c-2-25-2-55 2-80',
+    mercury: 'M148 170c2-25 4-52 8-75',
+    girdle: 'M84 78c20 8 42 10 62 2',
+    marriage: 'M150 96l14-4',
+  };
+  const DIAGRAM_OUTLINE = 'M62 220c-14-18-20-40-20-64V96c0-8 6-14 13-14s13 6 13 14v34M68 128V50c0-9 7-16 16-16s16 7 16 16v66M100 116V34c0-9 7-16 16-16s16 7 16 16v90M132 122V56c0-9 7-16 16-16s16 7 16 16v66c0 40-4 62-24 82-16 16-38 24-62 20-18-3-32-12-42-28';
 
-  function geometricLinePoints(key, lm, facingMode) {
-    if (!lm || lm.length < 21) return null;
-    const fl = (i) => flipIfNeeded(lm[i], facingMode);
-    const wrist = fl(0), thumbCmc = fl(1), thumbMcp = fl(2), indexMcp = fl(5),
-          middleMcp = fl(9), ringMcp = fl(13), pinkyMcp = fl(17);
-    const toArr = (p) => [p.x, p.y];
-
-    switch (key) {
-      case 'life': {
-        const a = lerpPt(indexMcp, thumbMcp, 0.35);
-        const b = lerpPt(thumbMcp, thumbCmc, 0.55);
-        const c = lerpPt(thumbCmc, wrist, 0.6);
-        const d = lerpPt(wrist, pinkyMcp, 0.12);
-        return [a, b, c, d].map(toArr);
-      }
-      case 'heart': {
-        const a = lerpPt(pinkyMcp, wrist, 0.16);
-        const b = lerpPt(ringMcp, wrist, 0.13);
-        const c = lerpPt(middleMcp, wrist, 0.11);
-        const d = lerpPt(indexMcp, wrist, 0.10);
-        return [a, b, c, d].map(toArr);
-      }
-      case 'head': {
-        const a = lerpPt(indexMcp, wrist, 0.32);
-        const b = lerpPt(middleMcp, wrist, 0.36);
-        const c = lerpPt(ringMcp, wrist, 0.40);
-        return [a, b, c].map(toArr);
-      }
-      case 'fate': {
-        const a = lerpPt(wrist, middleMcp, 0.15);
-        const b = lerpPt(wrist, middleMcp, 0.55);
-        const c = lerpPt(wrist, middleMcp, 0.88);
-        return [a, b, c].map(toArr);
-      }
-      case 'sun': {
-        const a = lerpPt(wrist, ringMcp, 0.25);
-        const b = lerpPt(wrist, ringMcp, 0.6);
-        const c = lerpPt(wrist, ringMcp, 0.9);
-        return [a, b, c].map(toArr);
-      }
-      case 'mercury': {
-        const a = lerpPt(wrist, pinkyMcp, 0.25);
-        const b = lerpPt(wrist, pinkyMcp, 0.6);
-        const c = lerpPt(wrist, pinkyMcp, 0.88);
-        return [a, b, c].map(toArr);
-      }
-      case 'girdle': {
-        const a = lerpPt(middleMcp, wrist, 0.06);
-        const b = lerpPt(ringMcp, wrist, 0.05);
-        const c = lerpPt(pinkyMcp, wrist, 0.07);
-        return [a, b, c].map(toArr);
-      }
-      case 'marriage': {
-        const base = lerpPt(pinkyMcp, wrist, 0.14);
-        const inward = lerpPt(pinkyMcp, indexMcp, 0.12);
-        const a = lerpPt(base, inward, 0.0);
-        const b = lerpPt(base, inward, 0.5);
-        return [a, b].map(toArr);
-      }
-      default:
-        return null;
-    }
-  }
-
-  function buildPhotoOverlay(which, lineKeys) {
-    const src = state.capturedImages[which];
-    if (!src) return '';
-    const aspect = state.capturedAspect[which] || (3 / 4);
-    const lm = state.capturedLandmarks[which];
-    const facingMode = state.capturedFacingMode[which] || 'environment';
+  function buildLineDiagram() {
     const labels = t().lineLegendLabels;
     let paths = '';
     let legend = '';
-    (lineKeys || []).forEach(key => {
-      const pts = geometricLinePoints(key, lm, facingMode);
-      if (!pts || pts.length < 2) return;
+    Object.keys(DIAGRAM_PATHS).forEach(key => {
       const color = LINE_COLORS[key] || 'var(--gold-bright)';
-      const d = catmullRomPath(pts);
-      paths += `<path id="line-path-${key}" class="line-path" d="${d}" style="stroke:${color};"></path>`;
+      paths += `<path id="diagram-line-${key}" class="diagram-line" d="${DIAGRAM_PATHS[key]}" style="stroke:${color};"></path>`;
       legend += `<div class="chip"><span class="swatch" style="background:${color};"></span>${escapeHtml(labels[key] || key)}</div>`;
     });
     return `
-      <div class="photo-frame" style="aspect-ratio: ${aspect};">
-        <img src="${src}" alt="Your scanned palm" />
-        <svg viewBox="0 0 1 1" preserveAspectRatio="none">${paths}</svg>
+      <div class="diagram-frame">
+        <svg class="diagram-svg" viewBox="0 0 200 240">
+          <path class="diagram-outline" d="${DIAGRAM_OUTLINE}"></path>
+          ${paths}
+        </svg>
       </div>
-      ${legend ? `<div class="line-legend">${legend}</div>` : ''}
+      <div class="line-legend">${legend}</div>
     `;
   }
 
@@ -1633,11 +1580,8 @@
       // to English keyword matching only for older responses that lack it.
       const lineKey = sec.key || matchLineKey(sec.heading);
       if (lineKey) {
-        const pathEl = document.getElementById(`line-path-${lineKey}`);
-        if (pathEl) {
-          pathEl.style.transition = 'stroke-dashoffset 1.2s ease';
-          requestAnimationFrame(() => { pathEl.style.strokeDashoffset = '0'; });
-        }
+        const lineEl = document.getElementById(`diagram-line-${lineKey}`);
+        if (lineEl) lineEl.classList.add('active');
       }
 
       await sleep(250);
@@ -1655,21 +1599,14 @@
 
     // Free for now — monetization comes later with the Android build.
     const sections = data.sections || [];
-    const photoHtml = buildPhotoOverlay(which, data.lines);
+    const diagramHtml = buildLineDiagram();
 
     let sectionsHtml = '';
     sections.forEach((sec, idx) => {
       sectionsHtml += `<div class="section" data-index="${idx}"><h3>${escapeHtml(sec.heading)}<span class="rule"></span></h3><p></p></div>`;
     });
 
-    $('reading-body').innerHTML = photoHtml + sectionsHtml;
-
-    // Prime each traced line as hidden (full dash offset) before the reveal draws it in.
-    document.querySelectorAll('#reading-body .line-path').forEach(p => {
-      const len = p.getTotalLength();
-      p.style.strokeDasharray = len;
-      p.style.strokeDashoffset = len;
-    });
+    $('reading-body').innerHTML = diagramHtml + sectionsHtml;
 
     renderReadingActions(which);
     revealReading(sections);
